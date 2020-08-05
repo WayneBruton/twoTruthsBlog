@@ -7,6 +7,7 @@ const nodemailer = require("nodemailer");
 const totp = require("otplib").totp;
 // import { totp } from 'otplip';
 const otp_secret = "fgfdgdfgdfgdgdgdf";
+const axios = require("axios")
 
 // CHECK TOKEN TO ENSURE LOGGED IN§
 let checktoken = (req, res, next) => {
@@ -178,8 +179,9 @@ router.post("/createMember", (req, res) => {
   let name = req.body.name;
   let email = req.body.email;
   let password = req.body.password;
+  let mobile = req.body.mobile;
   let finalPassword = bcrypt.hash(password, saltRounds, function (err, hash) {
-    let mysql1 = `insert into members (name, email, password) values ('${name}', '${email}', '${hash}')`;
+    let mysql1 = `insert into members (name, email, password, mobile) values ('${name}', '${email}', '${hash}', '${mobile}')`;
     let mysql2 = `select * from members where email = '${email}'`;
     let mysql = `${mysql1};${mysql2}`;
     pool.getConnection(function (err, connection) {
@@ -221,6 +223,8 @@ router.put("/editMember", checktoken, (req, res) => {
   });
 });
 
+
+
 //RESET PASSWORD TOKEN
 router.put("/resetPasswordToken", (req, res) => {
   let mysql = `select * from members where email = '${req.body.email}'`;
@@ -238,9 +242,46 @@ router.put("/resetPasswordToken", (req, res) => {
             error: `No user registered under "${req.body.email}", try signup and register as a user.`,
           });
         } else {
+          console.log("RESULT", result[0].mobile)
           // let email = req.body.email;
           let tokenA = totp.generate(otp_secret);
-          res.json({ token: tokenA });
+          // res.json({ token: tokenA });
+
+          let smstoken = process.env.SMSToken;
+          params = {
+            to: `${result[0].mobile}`,
+            body: `Here is your One Time Pin for TwoTruths
+                    => ${tokenA} <=`,
+          };
+        
+          axios.defaults.headers.post["Authorization"] = `${smstoken}`; // for POST requests
+          // await 
+          let resultA =  axios
+            .post("https://api.bulksms.com/v1/messages", params)
+            .then((result) => {
+              smsResult = result.status;
+              console.log("The RESULT", result.status);
+              // let data = {
+              //   result: smsResult,
+              //   OTP: otp,
+              //   status: response.status,
+              // };
+              res.json({ token: tokenA });
+            })
+            .catch((error) => {
+              // console.log("Status:", error.response.status);
+        
+              let data = {
+                result: smsResult,
+                OTP: otp,
+                status: error,
+              };
+              res.json(data);
+            });
+
+
+
+
         }
       }
     });

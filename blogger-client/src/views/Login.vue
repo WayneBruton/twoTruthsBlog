@@ -109,8 +109,8 @@ export default {
     passwordIncorrect: true,
     email: "waynebruton@icloud.com",
     emailRules: [
-      (v) => !!v || "E-mail is required",
-      (v) => /.+@.+\..+/.test(v) || "E-mail must be valid",
+      v => !!v || "E-mail is required",
+      v => /.+@.+\..+/.test(v) || "E-mail must be valid"
     ],
     password: "Qwerty1!",
     newPassword: "Qwerty1!",
@@ -122,7 +122,7 @@ export default {
     passwordResetToken: null,
     enteredToken: null,
     flex: 12,
-    offset: 0,
+    offset: 0
   }),
   mounted() {
     if (this.windowWidth < 768) {
@@ -137,13 +137,14 @@ export default {
     async login() {
       let user = {
         email: this.email,
-        password: this.password,
+        password: this.password
       };
       let response = await DirectoryServices.login(user);
       if (response.data.error) {
         this.errorMessage = response.data.error;
-        window.localStorage.removeItem("token")((this.snackbar = true)),
-          (this.password = "");
+        window.localStorage.clear();
+        this.snackbar = true;
+        this.password = "";
       } else {
         // console.log(response.data.user)
         this.snackbar = false;
@@ -155,7 +156,7 @@ export default {
           avatar: response.data.user.avatar,
           website: response.data.user.website,
           showEmail: response.data.user.showEmail,
-          aboutMember: response.data.user.aboutMember,
+          aboutMember: response.data.user.aboutMember
         };
         this.$store.dispatch("setUser", member);
         this.$router.push({ name: "home" });
@@ -163,7 +164,7 @@ export default {
     },
     async resetPasswordToken() {
       let user = {
-        email: this.email,
+        email: this.email
       };
       let response = await DirectoryServices.resetPasswordToken(user);
       console.log(response.data.token);
@@ -175,8 +176,8 @@ export default {
     clearResetToken() {
       setTimeout(() => {
         this.passwordResetToken = null;
-        // }, 1800000);
-      }, 60000);
+      }, 1800000);
+      // }, 60000);
     },
     cancelResetPassword() {
       this.passwordResetToken = null;
@@ -188,7 +189,7 @@ export default {
       ) {
         let user = {
           email: this.email,
-          password: this.newPassword,
+          password: this.newPassword
         };
         let response = await DirectoryServices.resetPassword(user);
         console.log(response.data);
@@ -208,7 +209,7 @@ export default {
     },
     async checkEmail() {
       let email = {
-        email: this.email,
+        email: this.email
       };
       let response = await DirectoryServices.checkEmail(email);
       if (response.data.length === 0) {
@@ -217,9 +218,9 @@ export default {
       } else {
         this.emailExists = true;
       }
-    },
+    }
   },
-  watch: {},
+  watch: {}
 };
 </script>
 

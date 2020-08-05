@@ -143,10 +143,10 @@ export default {
     viewLook: "mdi-view-grid",
     flex: 12,
     offset: 0,
-    loggedIn: false,
+    loggedIn: false
   }),
   components: {
-    SignupPopup,
+    SignupPopup
   },
   watch: {
     loggedIn: function() {
@@ -155,7 +155,7 @@ export default {
       }
     },
     windowWidth: function() {
-      this.resizePage()
+      this.resizePage();
     }
   },
   async mounted() {
@@ -175,7 +175,7 @@ export default {
       this.$nextTick(() => {
         window.addEventListener("resize", this.onResize);
       });
-      this.resizePage()
+      this.resizePage();
     }, 0);
   },
   beforeDestroy() {
@@ -186,15 +186,15 @@ export default {
       this.windowWidth = window.innerWidth;
     },
     resizePage() {
-       if (this.windowWidth < 768) {
-        this.cards.forEach((element) => {
+      if (this.windowWidth < 768) {
+        this.cards.forEach(element => {
           element.flex = 12;
           this.flex = 12;
           this.offset = 0;
           element.title = element.title.toUpperCase();
         });
       } else {
-        this.cards.forEach((element) => {
+        this.cards.forEach(element => {
           this.flex = 8;
           this.offset = 2;
           if (this.cards.length < 3) {
@@ -217,8 +217,8 @@ export default {
       } else {
         this.viewLook = "mdi-format-list-bulleted";
       }
-    },
-  },
+    }
+  }
 };
 </script>
 

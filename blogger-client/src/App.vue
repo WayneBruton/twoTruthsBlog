@@ -1,7 +1,23 @@
 <template>
   <v-app>
+    <v-container fluid>
+      <!-- <v-system-bar
+        sticky
+          color="lime"
+          :height="height"
+          :lights-out="lightsOut"
+          :window="window"
+        >
+          <v-icon>mdi-gmail</v-icon>
+          <span>10 unread emails</span>
+          <v-spacer></v-spacer>
+          <v-icon>mdi-wifi-strength-4</v-icon>
+          <v-icon>mdi-signal-cellular-outline</v-icon>
+          <v-icon>mdi-battery</v-icon>
+          <span>12:30</span>
+        </v-system-bar> -->
+    </v-container>
     <Header />
-    <!-- <v-content> -->
     <v-main>
       <v-layout text-center wrap>
         <v-flex xs12 md12 offsetmd9>
@@ -22,12 +38,12 @@ export default {
   name: "App",
 
   components: {
-    Header,
+    Header
   },
 
   data: () => ({
     //
-  }),
+  })
 };
 </script>
 

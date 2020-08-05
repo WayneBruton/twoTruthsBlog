@@ -9,10 +9,13 @@
               :cloudName="cloudName"
               :publicId="cards.coverImgID"
               class="white--text align-end"
-              width="100%"
+              height="250"
               loading="lazy"
             >
-              <cld-transformation crop="fill" quality="auto" />
+              <cld-transformation crop="fit" />
+              <cld-transformation gravity="center" />
+
+              <cld-transformation quality="auto" fetchFormat="auto" />
             </cld-image>
             <v-card-text
               ><strong>{{ cards.credit }}</strong></v-card-text
@@ -150,7 +153,7 @@
                 </v-tooltip>
               </v-toolbar>
 
-              <ul v-if="showComments">
+              <ul class="commentsUL" v-if="showComments">
                 <span v-if="!comments.length"
                   >No comments yet. Be the first!!</span
                 >
@@ -235,7 +238,7 @@
                   </v-card>
 
                   <!-- replies -->
-                  <ul>
+                  <ul class="commentsUL">
                     <li
                       v-for="reply in item.reply"
                       :key="reply.id"
@@ -452,14 +455,14 @@ export default {
     followingText: "follow",
     snackbar: false,
     snackBarMessage: "",
-    timeOut: 3000,
+    timeOut: 3000
   }),
   components: {},
   async beforeMount() {},
   watch: {
     windowWidth: function() {
       this.resizePage();
-    },
+    }
   },
   async mounted() {
     // if (this.windowWidth < 768) {
@@ -497,10 +500,10 @@ export default {
       this.publicID = this.cards.avatar;
       // console.log("cards", this.cards);
       this.votedMembers = [];
-      response.data[1].forEach((el) => {
+      response.data[1].forEach(el => {
         this.votedMembers.push(el.member);
       });
-      let thisMember = this.votedMembers.filter((el) => {
+      let thisMember = this.votedMembers.filter(el => {
         return el === this.$store.state.userId;
       });
       // console.log(thisMember);
@@ -533,10 +536,10 @@ export default {
       let query = search.replace("?", "").split("=");
       let credentials = query[query.length - 1];
       let comments = {
-        id: credentials,
+        id: credentials
       };
       let commentsResponse = await DirectoryService.getComments(comments);
-      commentsResponse.data.forEach((el) => {
+      commentsResponse.data.forEach(el => {
         el.currentUser = this.$store.state.userId;
         el.writtenBy = this.cards.member;
       });
@@ -565,7 +568,7 @@ export default {
           memberName: this.$store.state.userName,
           commentBy: targetID,
           articleNumber: this.currentArticle,
-          comment: this.addComment,
+          comment: this.addComment
         };
         await DirectoryService.addComment(credentials);
         this.addComment = "";
@@ -579,7 +582,7 @@ export default {
     async deleteComment(event) {
       let targetID = parseInt(event.currentTarget.id);
       let credentials = {
-        id: targetID,
+        id: targetID
       };
       await DirectoryService.deleteComment(credentials);
       this.getComments();
@@ -587,7 +590,7 @@ export default {
     async deleteReply(event) {
       let targetID = parseInt(event.currentTarget.id);
       let credentials = {
-        id: targetID,
+        id: targetID
       };
       await DirectoryService.deleteReply(credentials);
       this.getComments();
@@ -610,7 +613,7 @@ export default {
           commentBy: this.$store.state.userId,
           articleNumber: targetID,
           replyTo: this.currentCommentID,
-          comment: this.replyComment,
+          comment: this.replyComment
         };
         await DirectoryService.addReply(credentials);
         this.dialog = false;
@@ -630,7 +633,7 @@ export default {
       let followingAndBookmarked = {
         member: this.$store.state.userId,
         member_following: this.cards.member,
-        article: this.cards.id,
+        article: this.cards.id
       };
       let followingResponse = await DirectoryService.followingAndBookmarked(
         followingAndBookmarked
@@ -690,7 +693,7 @@ export default {
         let credentials = {
           articleID: this.cards.id,
           userID: this.$store.state.userId,
-          claps: this.claps,
+          claps: this.claps
         };
         let response = await DirectoryService.addLikes(credentials);
         console.log(response.data);
@@ -711,7 +714,7 @@ export default {
       let bookMark = {
         member: this.$store.state.userId,
         article: this.cards.id,
-        toBookMark: toBookMark,
+        toBookMark: toBookMark
       };
       await DirectoryService.bookMark(bookMark);
     },
@@ -733,20 +736,20 @@ export default {
       let follow = {
         member: this.$store.state.userId,
         member_following: this.cards.member,
-        toFollow: toFollow,
+        toFollow: toFollow
       };
       await DirectoryService.follow(follow);
-    },
+    }
   },
   async beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
     if (this.tokenValid) {
       let credentials = {
-        articleID: this.cards.id,
+        articleID: this.cards.id
       };
       await DirectoryService.updateArticleLikes(credentials);
     }
-  },
+  }
 };
 </script>
 
@@ -758,24 +761,113 @@ export default {
 .centered-input >>> input {
   text-align: center;
 }
+div >>> .ql-indent-1 {
+  text-indent: 8%;
+}
+div >>> .ql-indent-2 {
+  text-indent: 16%;
+}
+div >>> .ql-indent-3 {
+  text-indent: 24%;
+}
+div >>> .ql-indent-4 {
+  text-indent: 32%;
+}
+div >>> .ql-indent-5 {
+  text-indent: 40%;
+}
+div >>> .ql-indent-6 {
+  text-indent: 48%;
+}
+div >>> .ql-indent-7 {
+  text-indent: 56%;
+}
+div >>> .ql-indent-8 {
+  text-indent: 64%;
+}
+
+div >>> .ql-align-center {
+  text-align: center;
+}
+div >>> .ql-align-right {
+  text-align: right;
+}
+div >>> .ql-align-justify {
+  text-align: justify;
+}
+div >>> .ql-syntax {
+  color: white;
+  background-color: black;
+  margin: 5px 5px;
+  padding: 5px 5px;
+  border: 1px solid black;
+  border-radius: 7px;
+}
 div >>> img {
-  width: 100%;
+  width: 60%;
+}
+div >>> p,
+div >>> h1,
+div >>> h2,
+div >>> h3,
+div >>> h4,
+div >>> h5,
+div >>> h6,
+div >>> li,
+div >>> ul,
+div >>> ol,
+/* div >>> blockquote, */
+div >>> pre {
+  text-align: left;
+}
+div >>> blockquote {
+  text-align: center;
+}
+
+.preview {
+  background-color: lightgrey;
+  border: 1px solid lightgrey;
+  border-radius: 7px;
+}
+.coverImg {
+  size: 120%;
+  align-content: flex-start;
+  align-items: flex-start;
+  align-self: flex-start;
+  left: 0px;
+}
+
+div >>> img {
+  width: 80%;
+  align-content: center;
 }
 div >>> p {
   font-size: 115%;
+}
+div >>> pre {
+  white-space: pre-wrap; /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -pre-wrap; /* Opera 4-6 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word;
+  text-align: justify;
 }
 div >>> ol {
   list-style-type: decimal;
   font-size: 115%;
 }
 div >>> ul {
-  /* list-style-type:circle; */
+  list-style-type: square;
   font-size: 115%;
 }
 ul {
   list-style-type: none;
-  /* list-style-position: outside; */
 }
+
+.commentsUL {
+  list-style-type: none;
+}
+
 .comment:hover {
   background-color: rgba(169, 165, 165, 0.2);
 }

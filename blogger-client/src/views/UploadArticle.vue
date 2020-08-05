@@ -296,6 +296,14 @@ export default {
         ],
         [
           {
+            indent: "-1"
+          },
+          {
+            indent: "+1"
+          }
+        ], // outdent/indent
+        [
+          {
             color: []
           },
           {
@@ -344,7 +352,7 @@ export default {
       }
     },
     windowWidth: function() {
-      this.resizePage()
+      this.resizePage();
     }
   },
   computed: {},
@@ -357,7 +365,7 @@ export default {
       this.$nextTick(() => {
         window.addEventListener("resize", this.onResize);
       });
-      this.resizePage()
+      this.resizePage();
     }, 0);
     // if (this.windowWidth < 768) {
     //   this.flex = 12;
@@ -379,17 +387,17 @@ export default {
     }
   },
   methods: {
-     onResize() {
+    onResize() {
       this.windowWidth = window.innerWidth;
     },
     resizePage() {
       if (this.windowWidth < 768) {
-      this.flex = 12;
-      this.offset = 0;
-    } else {
-      this.flex = 6;
-      this.offset = 3;
-    }
+        this.flex = 12;
+        this.offset = 0;
+      } else {
+        this.flex = 6;
+        this.offset = 3;
+      }
     },
     addNewTag() {
       this.newTags = [];
@@ -546,6 +554,52 @@ export default {
 </script>
 
 <style scoped>
+div >>> .ql-indent-1 {
+  text-indent: 8%;
+}
+div >>> .ql-indent-2 {
+  text-indent: 16%;
+}
+div >>> .ql-indent-3 {
+  text-indent: 24%;
+}
+div >>> .ql-indent-4 {
+  text-indent: 32%;
+}
+div >>> .ql-indent-5 {
+  text-indent: 40%;
+}
+div >>> .ql-indent-6 {
+  text-indent: 48%;
+}
+div >>> .ql-indent-7 {
+  text-indent: 56%;
+}
+div >>> .ql-indent-8 {
+  text-indent: 64%;
+}
+
+div >>> img {
+  width: 80%;
+  align-content: center;
+}
+div >>> p {
+  font-size: 115%;
+}
+
+div >>> pre {
+  white-space: pre-wrap; /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -pre-wrap; /* Opera 4-6 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word;
+  text-align: justify;
+}
+
+div >>> .ql-align-center {
+  text-align: center;
+}
+
 div >>> .ql-align-center {
   text-align: center;
 }
@@ -563,9 +617,9 @@ div >>> .ql-syntax {
   border: 1px solid black;
   border-radius: 7px;
 }
-div >>> img {
+/* div >>> img {
   width: 80%;
-}
+} */
 div >>> p,
 div >>> h1,
 div >>> h2,
@@ -574,9 +628,12 @@ div >>> h4,
 div >>> h5,
 div >>> h6,
 div >>> li,
-div >>> blockquote,
+/* div >>> blockquote, */
 div >>> pre {
   text-align: left;
+}
+div >>> blockquote {
+  text-align: center;
 }
 .preview {
   background-color: lightgrey;

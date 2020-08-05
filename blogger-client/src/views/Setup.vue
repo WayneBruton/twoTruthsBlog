@@ -217,7 +217,6 @@
                 >
                   <v-list-item-icon v-if="windowWidth > 380">
                     <cld-image
-                    
                       :cloudName="cloudName"
                       :publicId="item.publicId"
                       loading="lazy"
@@ -416,7 +415,7 @@ export default {
       tags: [],
       popularTags: [],
       currentMonthLikes: 0,
-      totalLikes: 0,
+      totalLikes: 0
     };
   },
   mounted() {
@@ -425,7 +424,7 @@ export default {
       this.$nextTick(() => {
         window.addEventListener("resize", this.onResize);
       });
-      this.resizePage()
+      this.resizePage();
     }, 0);
     // if (this.windowWidth < 768) {
     //   this.flex = 12;
@@ -479,22 +478,22 @@ export default {
       }
       console.log("cards", this.cards);
     },
-windowWidth: function() {
-      this.resizePage()
+    windowWidth: function() {
+      this.resizePage();
     }
   },
   methods: {
-     onResize() {
+    onResize() {
       this.windowWidth = window.innerWidth;
     },
     resizePage() {
-        if (this.windowWidth < 768) {
-      this.flex = 12;
-      this.offset = 0;
-    } else {
-      this.flex = 6;
-      this.offset = 3;
-    }
+      if (this.windowWidth < 768) {
+        this.flex = 12;
+        this.offset = 0;
+      } else {
+        this.flex = 6;
+        this.offset = 3;
+      }
     },
     showMyEmail(event) {
       let targetID = event;
@@ -570,14 +569,14 @@ windowWidth: function() {
       if (response.data.currentMonth) {
         this.currentMonthLikes = response.data.currentMonth;
       } else {
-        this.currentMonthLikes = 0
+        this.currentMonthLikes = 0;
       }
       if (response.data.total) {
         this.totalLikes = response.data.total;
       } else {
-        this.totalLikes = 0
+        this.totalLikes = 0;
       }
-      
+
       // this.totalLikes = response.data.total;
     },
     //REVERSE THIS.CARDS
@@ -729,7 +728,6 @@ windowWidth: function() {
         this.snackBarMessage = "Website not correct";
         this.snackbar = true;
       }
-      
     },
     //DISCARD USER CHANGES
     discardChanges() {
@@ -870,7 +868,7 @@ windowWidth: function() {
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
-  },
+  }
 };
 </script>
 

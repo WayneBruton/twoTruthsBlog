@@ -92,7 +92,7 @@ export default {
       this.$nextTick(() => {
         window.addEventListener("resize", this.onResize);
       });
-      this.resizePage()
+      this.resizePage();
     }, 0);
     // if (this.windowWidth < 768) {
     //   this.flex = 12;
@@ -120,26 +120,26 @@ export default {
   computed: {},
   watch: {
     windowWidth: function() {
-      this.resizePage()
+      this.resizePage();
     }
   },
   methods: {
     onResize() {
       this.windowWidth = window.innerWidth;
     },
-     resizePage() {
-        if (this.windowWidth < 768) {
-      this.flex = 12;
-      this.offset = 0;
-    } else {
-      this.flex = 6;
-      this.offset = 3;
+    resizePage() {
+      if (this.windowWidth < 768) {
+        this.flex = 12;
+        this.offset = 0;
+      } else {
+        this.flex = 6;
+        this.offset = 3;
+      }
     }
-     }
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
-  },
+  }
 };
 </script>
 

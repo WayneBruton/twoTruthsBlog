@@ -13,6 +13,8 @@ create table members (
     paidMember boolean not null default false 
 );
 
+-- alter table members add column mobile varchar(10);
+alter table members modify mobile varchar(12);
 alter table members add column aboutMember text;
 alter table members add column showEmail boolean default false;
 alter table members add column expires TIMESTAMP DEFAULT NOW();

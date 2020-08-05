@@ -233,7 +233,7 @@ import DirectoryService from "../services/DirectoryServices";
 export default {
   name: "editdraft",
   components: {
-    VueEditor,
+    VueEditor
   },
   data() {
     return {
@@ -251,11 +251,11 @@ export default {
       offset: 2,
       src: {
         url: `https://res.cloudinary.com/dqimswgub/image/upload/v1595081198/sample.jpg`,
-        url_id: "sample",
+        url_id: "sample"
       },
       originalsrc: {
         url: `https://res.cloudinary.com/dqimswgub/image/upload/v1595081198/sample.jpg`,
-        url_id: "alejandro-escamilla-10-unsplash",
+        url_id: "alejandro-escamilla-10-unsplash"
       },
       oldsrc: "",
       email: `mailTo:${this.$store.state.email}`,
@@ -270,50 +270,58 @@ export default {
       customToolbar: [
         [
           {
-            header: [false, 1, 2, 3, 4, 5, 6],
-          },
+            header: [false, 1, 2, 3, 4, 5, 6]
+          }
         ],
         ["bold", "italic", "underline", "strike"], // toggled buttons
         [
           {
-            align: "",
+            align: ""
           },
           {
-            align: "center",
+            align: "center"
           },
           {
-            align: "right",
+            align: "right"
           },
           {
-            align: "justify",
-          },
+            align: "justify"
+          }
         ],
         ["blockquote", "code-block"],
         [
           {
-            list: "ordered",
+            list: "ordered"
           },
           {
-            list: "bullet",
-          },
+            list: "bullet"
+          }
         ],
         [
           {
-            color: [],
+            indent: "-1"
           },
           {
-            background: [],
+            indent: "+1"
+          }
+        ], // outdent/indent
+        [
+          {
+            color: []
           },
+          {
+            background: []
+          }
         ], // dropdown with defaults from theme
         ["link", "image"],
-        ["clean"], // remove formatting button
+        ["clean"] // remove formatting button
       ],
       snackbar: false,
       snackBarMessage: "",
-      timeOut: 3000,
+      timeOut: 1000,
       articleTags: [],
       tags: [],
-      newTags: [],
+      newTags: []
     };
   },
   watch: {
@@ -343,7 +351,7 @@ export default {
     },
     windowWidth: function() {
       this.resizePage();
-    },
+    }
   },
   computed: {},
   async mounted() {
@@ -376,7 +384,7 @@ export default {
     this.articleTags = [];
     let existingTags = JSON.parse(response2.data[0].tags);
     if (existingTags.length) {
-      existingTags.forEach((el) => {
+      existingTags.forEach(el => {
         this.articleTags.push(el);
       });
     }
@@ -393,7 +401,7 @@ export default {
 
     let response = await DirectoryService.getTags();
     this.tags = [];
-    response.data.forEach((el) => {
+    response.data.forEach(el => {
       this.tags.push(el.tag);
     });
     if (this.$store.state.avatar === null) {
@@ -417,9 +425,9 @@ export default {
     },
     addNewTag() {
       this.newTags = [];
-      this.articleTags.forEach((el) => {
+      this.articleTags.forEach(el => {
         let tag = el;
-        let result = this.tags.filter((element) => {
+        let result = this.tags.filter(element => {
           return element === tag;
         });
         if (!result.length) {
@@ -437,7 +445,7 @@ export default {
         let url_id = response.data.url_id;
         let imageInfo = {
           url,
-          url_id,
+          url_id
         };
         this.oldsrc = this.src;
         this.deleteCoverImage();
@@ -496,7 +504,7 @@ export default {
       this.file = null;
       (this.title = ""), (this.credit = "");
       let credentials = {
-        id: this.articleId,
+        id: this.articleId
       };
       let response = await DirectoryService.deleteEditArticle(credentials);
       console.log(response.data);
@@ -512,7 +520,7 @@ export default {
       let url_id = response.data.url_id;
       let imageInfo = {
         url,
-        url_id,
+        url_id
       };
       this.articleImagesArray.push(imageInfo);
       Editor.insertEmbed(cursorLocation, "image", url);
@@ -553,35 +561,83 @@ export default {
           tags: JSON.stringify(this.articleTags),
           isDraft: isDraft,
           newTags: JSON.stringify(this.newTags),
-          articleImages: JSON.stringify(this.articleImagesArray),
+          articleImages: JSON.stringify(this.articleImagesArray)
         };
         let response = await DirectoryService.saveArticle(article);
         if (response.data.Awesome && !isDraft) {
           this.snackBarMessage = "Successfully Published";
           this.snackbar = true;
-          setTimeout(() => {
-            this.$router.push({ name: "setup" });
-          }, 3000);
+          // setTimeout(() => {
+          //   this.$router.push({ name: "setup" });
+          // }, 3000);
         } else if (response.data.Awesome && isDraft) {
           this.snackBarMessage = "Saved to Drafts";
           this.snackbar = true;
-          setTimeout(() => {
-            this.$router.push({ name: "setup" });
-          }, 3000);
+          // setTimeout(() => {
+          //   this.$router.push({ name: "setup" });
+          // }, 3000);
         }
       } else {
         this.snackBarMessage = "You must have at least one tag";
         this.snackbar = true;
       }
-    },
+    }
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
-  },
+  }
 };
 </script>
 
 <style scoped>
+.quillWrapper .ql-toolbar {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #fff;
+}
+div >>> .ql-indent-1 {
+  text-indent: 8%;
+}
+div >>> .ql-indent-2 {
+  text-indent: 16%;
+}
+div >>> .ql-indent-3 {
+  text-indent: 24%;
+}
+div >>> .ql-indent-4 {
+  text-indent: 32%;
+}
+div >>> .ql-indent-5 {
+  text-indent: 40%;
+}
+div >>> .ql-indent-6 {
+  text-indent: 48%;
+}
+div >>> .ql-indent-7 {
+  text-indent: 56%;
+}
+div >>> .ql-indent-8 {
+  text-indent: 64%;
+}
+
+div >>> img {
+  width: 80%;
+  align-content: center;
+}
+div >>> p {
+  font-size: 115%;
+}
+div >>> pre {
+  white-space: pre-wrap; /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -pre-wrap; /* Opera 4-6 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word;
+  text-align: justify;
+}
+
 div >>> .ql-align-center {
   text-align: center;
 }
@@ -610,9 +666,17 @@ div >>> h4,
 div >>> h5,
 div >>> h6,
 div >>> li,
-div >>> blockquote,
+/* div >>> blockquote, */
 div >>> pre {
   text-align: left;
+}
+div >>> blockquote {
+  text-align: center;
+}
+div >>> li,
+ul,
+ol {
+  font-size: 115%;
 }
 .preview {
   background-color: lightgrey;

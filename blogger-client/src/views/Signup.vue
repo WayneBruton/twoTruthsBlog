@@ -1,12 +1,12 @@
 <template>
   <div>
     <br />
-     <v-row dense>
+    <v-row dense>
       <v-col>
-    <h1>Signup</h1>
-    <v-layout align-center justify-center style="padding: 8px;">
-      <!-- <v-layout(align-center justify-center)> -->
-      <!-- <v-flex
+        <h1>Signup</h1>
+        <v-layout align-center justify-center style="padding: 8px;">
+          <!-- <v-layout(align-center justify-center)> -->
+          <!-- <v-flex
         class="text-xs-center"
         xs-12
         md-6
@@ -35,21 +35,22 @@
               required
             ></v-text-field>
             <v-text-field
-              v-mask="'###-###-####'"
-              v-model="mobile"
-              :counter="10"
-              maxValue="12"
-              placeholder="082-555-5555"
-              label="Mobile"
-              required
-            ></v-text-field>
-
-            <v-text-field
               v-model="email"
               :rules="emailRules"
               label="E-mail"
               @blur="checkEmail"
               required
+            ></v-text-field>
+            <v-text-field
+              ref="mobile"
+              v-mask="'###-###-####'"
+              v-model="mobile"
+              :counter="13"
+              maxValue="12"
+              placeholder="082-555-5555"
+              label="Mobile SA Only"
+              required
+              @blur="correctNumber"
             ></v-text-field>
             <v-text-field
               v-model="password"
@@ -69,7 +70,7 @@
             <p v-if="repeatPasswordError">{{ repeatPasswordErrorMessage }}</p>
             <v-checkbox
               v-model="checkbox"
-              :rules="[(v) => !!v || 'You must agree to continue!']"
+              :rules="[v => !!v || 'You must agree to continue!']"
               label="Do you agree to behave as per our terms & conditions?"
               required
             ></v-checkbox>
@@ -98,18 +99,18 @@
               Login
             </v-btn>
             <v-snackbar v-model="snackbar">
-              Email exists - Rather login?
+              {{ snackbarMessage }}
               <v-btn color="pink" text @click="snackbar = false">
                 Close
               </v-btn>
             </v-snackbar>
             <br /><br />
           </v-form>
-        <!-- </v-flex> -->
-      <!-- </v-flex> -->
-    </v-layout>
+          <!-- </v-flex> -->
+          <!-- </v-flex> -->
+        </v-layout>
       </v-col>
-     </v-row>
+    </v-row>
   </div>
 </template>
 
@@ -121,22 +122,24 @@ export default {
     valid: true,
     value: true,
     name: "Wayne Bruton",
-    mobile:"",
+    mobile: "",
+    mobileForDB: "",
     nameRules: [
-      (v) => !!v || "Name is required",
-      (v) => (v && v.length <= 20) || "Name must be less than 15 characters",
+      v => !!v || "Name is required",
+      v => (v && v.length <= 20) || "Name must be less than 15 characters"
     ],
+    // email: "",
     email: "waynebruton@icloud.com",
     emailRules: [
-      (v) => !!v || "E-mail is required",
-      (v) => /.+@.+\..+/.test(v) || "E-mail must be valid",
+      v => !!v || "E-mail is required",
+      v => /.+@.+\..+/.test(v) || "E-mail must be valid"
     ],
     password: "Qwerty1!",
     passwordRules: [
-      (v) => !!v || "Password is required",
-      (v) =>
+      v => !!v || "Password is required",
+      v =>
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/.test(v) ||
-        "Min. 8 characters with at least one capital letter, a number and a special character.",
+        "Min. 8 characters with at least one capital letter, a number and a special character."
     ],
     repeatPassword: "Qwerty1!",
     repeatPasswordError: false,
@@ -144,14 +147,34 @@ export default {
     checkbox: false,
     emailExists: true,
     snackbar: false,
+    snackbarMessage: ""
   }),
   mounted() {},
   methods: {
+    correctNumber() {
+      if (this.mobile.length < 10) {
+        this.snackbarMessage = "Mobile number incorrect";
+        this.snackbar = true;
+        setTimeout(() => {
+          this.$refs.mobile.focus();
+        }, 0);
+      } else {
+        let adjustNumber = this.mobile.split("");
+        adjustNumber.shift(adjustNumber[0]);
+        adjustNumber.unshift("+27");
+        adjustNumber = adjustNumber.join("");
+        adjustNumber = adjustNumber.split("-");
+        adjustNumber = adjustNumber.join("");
+        this.mobileForDB = adjustNumber;
+        console.log(this.mobileForDB);
+      }
+    },
     async createMember() {
       let user = {
         name: this.name,
         email: this.email,
         password: this.password,
+        mobile: this.mobileForDB
       };
       let response = await DirectoryServices.createMember(user);
       window.localStorage.setItem("token", response.data.token);
@@ -168,11 +191,12 @@ export default {
     },
     async checkEmail() {
       let email = {
-        email: this.email,
+        email: this.email
       };
       let response = await DirectoryServices.checkEmail(email);
       if (response.data.length > 0) {
         this.emailExists = true;
+        this.snackbarMessage = "Email exists - Rather login?";
         this.snackbar = true;
       } else {
         this.emailExists = false;
@@ -180,7 +204,7 @@ export default {
     },
     logoff() {
       this.$store.dispatch("logout");
-    },
+    }
   },
   watch: {
     repeatPassword: function() {
@@ -190,7 +214,15 @@ export default {
         this.repeatPasswordError = false;
       }
     },
-  },
+    mobile: function() {
+      let test = this.mobile.split("");
+      if (test[0] !== "0") {
+        test.unshift("0");
+        this.mobile = test.join("");
+      }
+      // console.log(this.mobile);
+    }
+  }
 };
 </script>
 
