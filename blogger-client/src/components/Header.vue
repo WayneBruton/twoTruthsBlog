@@ -1,7 +1,6 @@
 <template>
   <div>
-    <!-- <v-app-bar app color="primary" dark> -->
-    <v-system-bar
+    <!-- <v-system-bar
       v-if="!this.$store.state.isLoggedOn"
       sticky
       color="lime"
@@ -16,7 +15,7 @@
       <v-icon>mdi-signal-cellular-outline</v-icon>
       <v-icon>mdi-battery</v-icon>
       <span>12:30</span>
-    </v-system-bar>
+    </v-system-bar> -->
 
     <v-app-bar app color="indigo" dark>
       <!-- <v-app-bar app color="transparent" elevation="0" z-index="100"> -->

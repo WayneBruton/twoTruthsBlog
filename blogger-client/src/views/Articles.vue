@@ -1,15 +1,14 @@
 <template>
   <div class="about">
-    <br /><br /><br />
     <v-container>
       <v-col :cols="flex" :offset="offset">
         <v-row dense>
-          <v-card :id="cards.id" elevation="0" min-width="100%">
+          <v-card :id="cards.id" elevation="1" min-width="100%">
+            <!-- height="450" -->
             <cld-image
               :cloudName="cloudName"
               :publicId="cards.coverImgID"
               class="white--text align-end"
-              height="250"
               loading="lazy"
             >
               <cld-transformation crop="fit" />
@@ -103,249 +102,264 @@
             <br />
             <br />
 
-            <h3>Add Comment</h3>
-            <div style="display: flex; align-items: flex-end;">
-              <v-textarea
-                style="margin: 15px 15px; padding: 5px 10px;"
-                placeholder="Add a Comment"
-                v-model="addComment"
-                rounded
-                solo
-                counter="250"
-                maxLength="250"
-                rows="4"
-              ></v-textarea>
-              <v-btn
-                v-if="addComment"
-                :id="this.$store.state.userId"
-                style="margin-bottom: 50px;"
-                icon
-                text
-                @click="addNewComment($event)"
-                ><v-icon color="green">mdi-comment</v-icon>+</v-btn
-              >
-            </div>
-
-            <v-col :cols="12">
-              <v-toolbar color="rgba(171, 177, 184, 0.2)" elevation="0">
-                <v-spacer></v-spacer>
-                <v-toolbar-title>Comments</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn text icon v-on="on"
-                      ><v-icon color="green" @click="displayComments">{{
-                        showCommentsIcon
-                      }}</v-icon></v-btn
-                    >
-                  </template>
-                  <span>{{ showCommentsTooltip }}</span>
-                </v-tooltip>
-                <v-tooltip top v-if="showComments">
-                  <template v-slot:activator="{ on }">
-                    <v-btn v-on="on" text icon
-                      ><v-icon color="green" @click="getComments"
-                        >mdi-refresh</v-icon
-                      ></v-btn
-                    >
-                  </template>
-                  <span>Refresh</span>
-                </v-tooltip>
-              </v-toolbar>
-
-              <ul class="commentsUL" v-if="showComments">
-                <span v-if="!comments.length"
-                  >No comments yet. Be the first!!</span
+            <!-- #010a43 -->
+            <v-expansion-panels popout color="indigo">
+              <v-expansion-panel dark color="indigo">
+                <v-expansion-panel-header dark color="indigo" class="header"
+                  ><h2 style="color: white;">Comments</h2></v-expansion-panel-header
                 >
-                <li
-                  v-for="item in comments"
-                  :key="item.id"
-                  :id="item.id"
-                  style="margin-top: 5px;"
-                >
-                  <v-card
-                    max-width="1000"
-                    class="mx-auto comment"
-                    elevation="0"
-                  >
-                    <div style="display: flex;">
-                      <cld-image
-                        v-if="item.avatar"
-                        :cloudName="cloudName"
-                        :publicId="item.avatar"
-                      >
-                        <cld-transformation
-                          style="margin: 3px 3px;"
-                          crop="fill"
-                          gravity="face"
-                          border="2px_solid_transparent"
-                          radius="max"
-                          width="40"
-                          height="40"
-                          quality="auto"
-                          loading="lazy"
-                        />
-                      </cld-image>
-                      <v-card-text>
-                        <v-textarea
-                          style="width: 100%"
-                          v-html="item.comment"
-                          placeholder="comment"
-                          rounded
-                          solo
-                          readonly
-                          rows="1"
-                          auto-grow
-                        ></v-textarea>
-                      </v-card-text>
-                      <v-card-actions
-                        style="display: flex; justify-content: center; width: 13%;"
-                      >
-                        <v-tooltip top>
-                          <template v-slot:activator="{ on }">
-                            <v-btn
-                              v-on="on"
-                              style="margin-bottom: 50px;"
-                              text
-                              icon
-                              v-if="
-                                item.commentBy === item.currentUser ||
-                                  item.writtenBy === item.currentUser
-                              "
-                              :id="item.id"
-                              @click="deleteComment($event)"
-                              ><v-icon color="red">mdi-delete</v-icon></v-btn
-                            >
-                          </template>
-                          <span>Delete</span>
-                        </v-tooltip>
-                        <v-tooltip top>
-                          <template v-slot:activator="{ on }">
-                            <v-btn
-                              v-on="on"
-                              style="margin-bottom: 50px;"
-                              icon
-                              text
-                              :id="item.id"
-                              @click="replyToComment($event)"
-                              ><v-icon color="green">mdi-reply</v-icon></v-btn
-                            >
-                          </template>
-                          <span>Reply</span>
-                        </v-tooltip>
-                      </v-card-actions>
-                    </div>
-                  </v-card>
-
-                  <!-- replies -->
-                  <ul class="commentsUL">
-                    <li
-                      v-for="reply in item.reply"
-                      :key="reply.id"
-                      style="margin-top: 5px; margin-left: 15px;"
+                <v-expansion-panel-content>
+                  <br />
+                  <h3 style="padding-left: 5px;">Add Comment</h3>
+                  <div style="display: flex; align-items: flex-end;">
+                    <v-textarea
+                      style="margin: 15px 15px; padding: 5px 10px;"
+                      placeholder="Add a Comment"
+                      v-model="addComment"
+                      rounded
+                      solo
+                      counter="250"
+                      maxLength="250"
+                      rows="4"
+                    ></v-textarea>
+                    <v-btn
+                      v-if="addComment"
+                      :id="this.$store.state.userId"
+                      style="margin-bottom: 50px;"
+                      icon
+                      text
+                      @click="addNewComment($event)"
+                      ><v-icon color="green">mdi-comment</v-icon>+</v-btn
                     >
-                      <v-card
-                        max-width="1000"
-                        class="mx-auto commentReply"
-                        elevation="0"
+                  </div>
+                  <v-col :cols="12">
+                    <v-toolbar color="rgba(171, 177, 184, 0.2)" elevation="0">
+                      <v-spacer></v-spacer>
+                      <v-toolbar-title>Comments</v-toolbar-title>
+                      <v-spacer></v-spacer>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on }">
+                          <v-btn text icon v-on="on"
+                            ><v-icon color="green" @click="displayComments">{{
+                              showCommentsIcon
+                            }}</v-icon></v-btn
+                          >
+                        </template>
+                        <span>{{ showCommentsTooltip }}</span>
+                      </v-tooltip>
+                      <v-tooltip top v-if="showComments">
+                        <template v-slot:activator="{ on }">
+                          <v-btn v-on="on" text icon
+                            ><v-icon color="green" @click="getComments"
+                              >mdi-refresh</v-icon
+                            ></v-btn
+                          >
+                        </template>
+                        <span>Refresh</span>
+                      </v-tooltip>
+                    </v-toolbar>
+
+                    <ul class="commentsUL" v-if="showComments">
+                      <span v-if="!comments.length"
+                        >No comments yet. Be the first!!</span
                       >
-                        <div style="display: flex;">
-                          <cld-image
-                            style="margin: 3px 3px;"
-                            v-if="reply.avatar"
-                            :cloudName="cloudName"
-                            :publicId="reply.avatar"
+                      <li
+                        v-for="item in comments"
+                        :key="item.id"
+                        :id="item.id"
+                        style="margin-top: 5px;"
+                      >
+                        <v-card
+                          max-width="1000"
+                          class="mx-auto comment"
+                          elevation="0"
+                        >
+                          <div style="display: flex;">
+                            <cld-image
+                              v-if="item.avatar"
+                              :cloudName="cloudName"
+                              :publicId="item.avatar"
+                            >
+                              <cld-transformation
+                                style="margin: 3px 3px;"
+                                crop="fill"
+                                gravity="face"
+                                border="2px_solid_transparent"
+                                radius="max"
+                                width="40"
+                                height="40"
+                                quality="auto"
+                                loading="lazy"
+                              />
+                            </cld-image>
+                            <v-card-text>
+                              <v-textarea
+                                style="width: 100%"
+                                v-html="item.comment"
+                                placeholder="comment"
+                                rounded
+                                solo
+                                readonly
+                                rows="1"
+                                auto-grow
+                              ></v-textarea>
+                            </v-card-text>
+                            <v-card-actions
+                              style="display: flex; justify-content: center; width: 13%;"
+                            >
+                              <v-tooltip top>
+                                <template v-slot:activator="{ on }">
+                                  <v-btn
+                                    v-on="on"
+                                    style="margin-bottom: 50px;"
+                                    text
+                                    icon
+                                    v-if="
+                                      item.commentBy === item.currentUser ||
+                                        item.writtenBy === item.currentUser
+                                    "
+                                    :id="item.id"
+                                    @click="deleteComment($event)"
+                                    ><v-icon color="red"
+                                      >mdi-delete</v-icon
+                                    ></v-btn
+                                  >
+                                </template>
+                                <span>Delete</span>
+                              </v-tooltip>
+                              <v-tooltip top>
+                                <template v-slot:activator="{ on }">
+                                  <v-btn
+                                    v-on="on"
+                                    style="margin-bottom: 50px;"
+                                    icon
+                                    text
+                                    :id="item.id"
+                                    @click="replyToComment($event)"
+                                    ><v-icon color="green"
+                                      >mdi-reply</v-icon
+                                    ></v-btn
+                                  >
+                                </template>
+                                <span>Reply</span>
+                              </v-tooltip>
+                            </v-card-actions>
+                          </div>
+                        </v-card>
+
+                        <!-- replies -->
+                        <ul class="commentsUL">
+                          <li
+                            v-for="reply in item.reply"
+                            :key="reply.id"
+                            style="margin-top: 5px; margin-left: 15px;"
                           >
-                            <cld-transformation
-                              crop="fill"
-                              gravity="face"
-                              border="2px_solid_transparent"
-                              radius="max"
-                              width="40"
-                              height="40"
-                              quality="auto"
-                              loading="lazy"
-                            />
-                          </cld-image>
-                          <v-card-text style="width: 85%">
-                            <v-textarea
-                              placeholder="comment"
-                              v-html="reply.comment"
-                              rounded
-                              solo
-                              readonly
-                              rows="1"
-                              auto-grow
-                            ></v-textarea>
-                          </v-card-text>
-                          <v-card-actions
-                            style="display: flex; justify-content: center; width: 10%;"
-                          >
-                            <v-tooltip top>
-                              <template v-slot:activator="{ on }">
-                                <v-btn
-                                  v-on="on"
-                                  style="margin-bottom: 50px;"
-                                  text
-                                  icon
-                                  v-if="
-                                    reply.commentBy === item.currentUser ||
-                                      item.writtenBy === item.currentUser
-                                  "
-                                  :id="reply.id"
-                                  @click="deleteReply($event)"
-                                  ><v-icon color="red"
-                                    >mdi-delete</v-icon
-                                  ></v-btn
+                            <v-card
+                              max-width="1000"
+                              class="mx-auto commentReply"
+                              elevation="0"
+                            >
+                              <div style="display: flex;">
+                                <cld-image
+                                  style="margin: 3px 3px;"
+                                  v-if="reply.avatar"
+                                  :cloudName="cloudName"
+                                  :publicId="reply.avatar"
                                 >
-                              </template>
-                              <span>Delete</span>
-                            </v-tooltip>
-                          </v-card-actions>
-                        </div>
-                      </v-card>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-            </v-col>
+                                  <cld-transformation
+                                    crop="fill"
+                                    gravity="face"
+                                    border="2px_solid_transparent"
+                                    radius="max"
+                                    width="40"
+                                    height="40"
+                                    quality="auto"
+                                    loading="lazy"
+                                  />
+                                </cld-image>
+                                <v-card-text style="width: 85%">
+                                  <v-textarea
+                                    placeholder="comment"
+                                    v-html="reply.comment"
+                                    rounded
+                                    solo
+                                    readonly
+                                    rows="1"
+                                    auto-grow
+                                  ></v-textarea>
+                                </v-card-text>
+                                <v-card-actions
+                                  style="display: flex; justify-content: center; width: 10%;"
+                                >
+                                  <v-tooltip top>
+                                    <template v-slot:activator="{ on }">
+                                      <v-btn
+                                        v-on="on"
+                                        style="margin-bottom: 50px;"
+                                        text
+                                        icon
+                                        v-if="
+                                          reply.commentBy ===
+                                            item.currentUser ||
+                                            item.writtenBy === item.currentUser
+                                        "
+                                        :id="reply.id"
+                                        @click="deleteReply($event)"
+                                        ><v-icon color="red"
+                                          >mdi-delete</v-icon
+                                        ></v-btn
+                                      >
+                                    </template>
+                                    <span>Delete</span>
+                                  </v-tooltip>
+                                </v-card-actions>
+                              </div>
+                            </v-card>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </v-col>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
 
+            <br />
             <br />
             <hr />
 
             <v-col :cols="flex" :offset="offset">
-              <div style="display: flex; align-items: center;">
+              <div class="author">
                 <cld-image
                   v-if="this.cards.avatar"
                   :cloudName="cloudName"
                   :publicId="publicID"
                 >
-                  <!-- effect="sepia" -->
                   <cld-transformation
                     crop="fill"
                     gravity="face"
                     border="2px_solid_transparent"
                     radius="max"
-                    width="70"
-                    height="70"
+                    width="200"
+                    height="200"
                     quality="auto"
                     loading="lazy"
                   />
                 </cld-image>
-                <div style=" width: 90%; padding: 10px 5px;">
+                <div class="authorDetails">
                   <p>Name: {{ this.cards.member_name }}</p>
                   <p v-if="this.cards.showEmail">
                     email:
-                    <a :href="this.cards.email">{{ this.cards.email }}</a>
+                    <a :href="this.cards.email">Send Email</a>
                   </p>
                   <p v-if="this.cards.website">
                     website:
-                    <a :href="this.cards.website" target="_blank">{{
-                      this.cards.website
-                    }}</a>
+                    <a :href="this.cards.website" target="_blank">
+                      Website
+                    </a>
                   </p>
-                  <!-- mdi-motion-sensor-off -->
                   <v-btn
+                    width="160"
                     outlined
                     text
                     :color="followingColor"
@@ -455,23 +469,16 @@ export default {
     followingText: "follow",
     snackbar: false,
     snackBarMessage: "",
-    timeOut: 3000
+    timeOut: 3000,
   }),
   components: {},
   async beforeMount() {},
   watch: {
     windowWidth: function() {
       this.resizePage();
-    }
+    },
   },
   async mounted() {
-    // if (this.windowWidth < 768) {
-    //   this.flex = 12;
-    //   this.offset = 0;
-    // } else {
-    //   this.flex = 8;
-    //   this.offset = 2;
-    // }
     this.windowWidth = window.innerWidth;
     setTimeout(() => {
       this.$nextTick(() => {
@@ -493,29 +500,24 @@ export default {
       this.$router.push({ name: "about" });
       this.$router.push({ name: "home" });
     } else {
-      // console.log("1", response.data);
       this.tokenValid = true;
       this.cards = response.data[0][0];
       this.cards.title = this.cards.title.toUpperCase();
       this.publicID = this.cards.avatar;
-      // console.log("cards", this.cards);
       this.votedMembers = [];
-      response.data[1].forEach(el => {
+      response.data[1].forEach((el) => {
         this.votedMembers.push(el.member);
       });
-      let thisMember = this.votedMembers.filter(el => {
+      let thisMember = this.votedMembers.filter((el) => {
         return el === this.$store.state.userId;
       });
-      // console.log(thisMember);
       this.votedBefore = [];
       if (thisMember.length) {
         this.votedBefore = true;
-        // console.log("Already Voted!!!!");
       } else {
         this.votedBefore = false;
       }
       this.followingAndBookmarked();
-      // this.getComments();
     }
   },
   methods: {
@@ -527,8 +529,8 @@ export default {
         this.flex = 12;
         this.offset = 0;
       } else {
-        this.flex = 8;
-        this.offset = 2;
+        this.flex = 10;
+        this.offset = 1;
       }
     },
     async getComments() {
@@ -536,10 +538,10 @@ export default {
       let query = search.replace("?", "").split("=");
       let credentials = query[query.length - 1];
       let comments = {
-        id: credentials
+        id: credentials,
       };
       let commentsResponse = await DirectoryService.getComments(comments);
-      commentsResponse.data.forEach(el => {
+      commentsResponse.data.forEach((el) => {
         el.currentUser = this.$store.state.userId;
         el.writtenBy = this.cards.member;
       });
@@ -568,7 +570,7 @@ export default {
           memberName: this.$store.state.userName,
           commentBy: targetID,
           articleNumber: this.currentArticle,
-          comment: this.addComment
+          comment: this.addComment,
         };
         await DirectoryService.addComment(credentials);
         this.addComment = "";
@@ -582,7 +584,7 @@ export default {
     async deleteComment(event) {
       let targetID = parseInt(event.currentTarget.id);
       let credentials = {
-        id: targetID
+        id: targetID,
       };
       await DirectoryService.deleteComment(credentials);
       this.getComments();
@@ -590,7 +592,7 @@ export default {
     async deleteReply(event) {
       let targetID = parseInt(event.currentTarget.id);
       let credentials = {
-        id: targetID
+        id: targetID,
       };
       await DirectoryService.deleteReply(credentials);
       this.getComments();
@@ -613,7 +615,7 @@ export default {
           commentBy: this.$store.state.userId,
           articleNumber: targetID,
           replyTo: this.currentCommentID,
-          comment: this.replyComment
+          comment: this.replyComment,
         };
         await DirectoryService.addReply(credentials);
         this.dialog = false;
@@ -633,7 +635,7 @@ export default {
       let followingAndBookmarked = {
         member: this.$store.state.userId,
         member_following: this.cards.member,
-        article: this.cards.id
+        article: this.cards.id,
       };
       let followingResponse = await DirectoryService.followingAndBookmarked(
         followingAndBookmarked
@@ -693,7 +695,7 @@ export default {
         let credentials = {
           articleID: this.cards.id,
           userID: this.$store.state.userId,
-          claps: this.claps
+          claps: this.claps,
         };
         let response = await DirectoryService.addLikes(credentials);
         console.log(response.data);
@@ -714,7 +716,7 @@ export default {
       let bookMark = {
         member: this.$store.state.userId,
         article: this.cards.id,
-        toBookMark: toBookMark
+        toBookMark: toBookMark,
       };
       await DirectoryService.bookMark(bookMark);
     },
@@ -736,20 +738,20 @@ export default {
       let follow = {
         member: this.$store.state.userId,
         member_following: this.cards.member,
-        toFollow: toFollow
+        toFollow: toFollow,
       };
       await DirectoryService.follow(follow);
-    }
+    },
   },
   async beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
     if (this.tokenValid) {
       let credentials = {
-        articleID: this.cards.id
+        articleID: this.cards.id,
       };
       await DirectoryService.updateArticleLikes(credentials);
     }
-  }
+  },
 };
 </script>
 
@@ -885,5 +887,30 @@ ul {
   background-color: rgba(201, 125, 195, 0.1);
   border: 1px solid rgba(107, 133, 189, 0.1);
   border-radius: 7px;
+}
+.author {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.authorDetails {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 15px;
+  margin: 10px 125px;
+}
+@media only screen and (max-width: 768px) {
+  .author {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .authorDetails {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 15px;
+    margin: 10px 125px;
+  }
 }
 </style>

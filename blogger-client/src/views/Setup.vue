@@ -879,17 +879,6 @@ export default {
 .cardList:hover {
   background-color: rgba(169, 165, 165, 0.2);
 }
-/* .choice {
-  margin: 2px 2px;
-  padding: 3px 2px;
-  background-color: rgba(176, 196, 222, 0.5);
-  border: 1px solid rgba(176, 196, 222, 0.5);
-  border-radius: 5px;
-} */
 @media only screen and (max-width: 768px) {
-  /* .cardList {
-    display: flex;
-    flex-direction: column;
-  } */
 }
 </style>

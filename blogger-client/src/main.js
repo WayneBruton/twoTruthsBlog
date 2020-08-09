@@ -9,7 +9,9 @@ import VueSanitize from "vue-sanitize";
 import VueCountable from "vue-countable";
 var VueCookie = require("vue-cookie");
 import VueMask from "v-mask";
-Vue.use(VueMask);
+import MyPlugin from "./plugins/myPlugins";
+Vue.use(MyPlugin);
+Vue.use(VueMask); 
 
 VueSanitize.defaults.allowedTags = ["p"];
 VueSanitize.defaults.disallowedTagsMode = "discard";

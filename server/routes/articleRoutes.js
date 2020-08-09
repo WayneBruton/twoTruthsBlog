@@ -175,7 +175,11 @@ router.post("/saveArticle", (req, res) => {
 
 //DELETE ARTICLE
 router.post("/deleteEditArticle", (req, res) => {
-  const mysql = `delete from articles where id = ${req.body.id}`;
+  // const mysql = `delete from articles where id = ${req.body.id}`;
+  let mysql1 = `delete from articles where id = ${req.body.id}`;
+  let mysql2 = `delete from articleLikes where article = ${req.body.id}`;
+  let mysql3 = `delete from bookmark where article = ${req.body.id}`;
+  let mysql = `${mysql3};${mysql2};${mysql1}`;
   pool.getConnection(function (err, connection) {
     if (err) {
       connection.release();
@@ -512,18 +516,24 @@ router.put("/getHistoryLikes", checktoken, (req, res) => {
           el.month = moment(el.createdAt).format("MMM-YYYY")
           el.currentMonth = currentMonth
         })
+        // console.log(result)
+        let currentMonthLikes = result.reduce((prev, el) => {
+          if (el.month == el.currentMonth) {
+            return prev = el.claps + prev
+          } else {
+            return prev = prev
+          }
+      }, 0)
         let totalLikes = result.reduce((prev, el ) => {
           return prev = el.claps + prev
         },0)
-        let currentMonthLikes = result.reduce((prev, el) => {
-            if (el.currentMonth === el.month) {
-              return prev = el.claps + prev
-            }
-        }, 0)
+        
+        
         let allLikes = {
           total: totalLikes,
           currentMonth: currentMonthLikes
         }
+        // console.log(allLikes)
       res.json(allLikes);
       }
     });

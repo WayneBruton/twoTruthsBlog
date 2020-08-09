@@ -1,14 +1,15 @@
 const express = require("express");
+const app = express();
+// var http = require('http').createServer(app);
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
+
 // const readtime = require("estimated-read-time");
 // const faker = require("faker");
 
-
 // let result = faker.lorem.paragraphs(nb=10);
 
-app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -18,20 +19,95 @@ if (port === 3000) {
   const dotenv = require("dotenv").config();
 }
 
+// io.on("connection", () => {
+//   console.log("there is a connection")
+// })
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
   bodyParser.urlencoded({
-    extended: true
+    extended: true,
   })
 );
 
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 const initialRoutes = require("./routes/initialRoutes"),
-      memberRoutes = require("./routes/memberRoutes"),
-      imageRoutes = require("./routes/imageRoutes"),
-      articleRoutes = require("./routes/articleRoutes");
+  memberRoutes = require("./routes/memberRoutes"),
+  imageRoutes = require("./routes/imageRoutes"),
+  articleRoutes = require("./routes/articleRoutes");
 
-app.use(initialRoutes, memberRoutes, imageRoutes, articleRoutes)
+app.use(initialRoutes, memberRoutes, imageRoutes, articleRoutes);
 
-app.listen(port, () => {
-    console.log(`Server running on port: ${port}`);
+const server = app.listen(port, () => {
+  console.log(`Server running on port: ${port}`);
+});
+
+//APP.JS
+  const io = require("socket.io")(server);
+  let members = [];
+  let users = {};
+  io.on("connection", function (socket) {
+    console.log("Connected", socket.id);
+    console.log("members", members);
+    socket.on("NEW_USER", function (data) {
+      if (data.user in users) {
+        socket.nickname = data.user;
+        users[socket.nickname] = socket;
+        let user = {
+          nickname: users[socket.nickname].nickname,
+          id: users[socket.nickname].id,
+        };
+        let exists = members.filter((el) => {
+          return el.nickname === data.user
+        })
+        if (!exists.length) {
+        members.push(user);
+        } else {
+        console.log("user exists", data.user);
+        }
+        console.log(members)
+      } else {
+        socket.nickname = data.user;
+        users[socket.nickname] = socket;
+        let user = {
+          nickname: users[socket.nickname].nickname,
+          id: users[socket.nickname].id,
+        };
+        members.push(user);
+      }
+      console.log("members", members);
+    });
+    socket.on("SEND_MESSAGE", function (data) {
+      var messageTo = data.messageTo;
+      console.log("MessageTo", messageTo);
+      console.log(data);
+      let member = members.filter((el) => {
+        return el.nickname === messageTo;
+      });
+      if (member.length > 0) {
+        users[messageTo].emit("MESSAGE", data);
+        users[data.user].emit("MESSAGE", data);
+        console.log("OK it worked");
+        console.log("members", members);
+      } else {
+        console.log("OOPs");
+        data.message = `User has left the chat`
+        users[data.user].emit("MESSAGE", data);
+      }
+      console.log("The message is to", member, messageTo);
+    });
+    socket.on("EXIT", function (data) {
+      console.log("DATA", data)
+      members = members.filter((el) => {
+        return (el.nickname !== data.user)
+      })
+      // socket.disconnect()
+    });
+    socket.on("disconnect", () => { 
+      console.log("Socket disconnected");
+      console.log("members", members);
+    });
   });
+
+// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

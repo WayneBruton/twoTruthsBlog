@@ -18,6 +18,8 @@
         </v-system-bar> -->
     </v-container>
     <Header />
+    <chat />
+
     <v-main>
       <v-layout text-center wrap>
         <v-flex xs12 md12 offsetmd9>
@@ -27,18 +29,23 @@
         </v-flex>
       </v-layout>
     </v-main>
+    <!-- <chat /> -->
+
     <!-- </v-content> -->
   </v-app>
 </template>
 
 <script>
 import Header from "./components/Header";
+import Chat from "./components/Chat.vue";
+
 
 export default {
   name: "App",
 
   components: {
-    Header
+    Header,
+    Chat
   },
 
   data: () => ({
