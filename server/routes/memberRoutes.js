@@ -5,8 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const totp = require("otplib").totp;
-// import { totp } from 'otplip';
-const otp_secret = "fgfdgdfgdfgdgdgdf";
+const otp_secret = process.env.OTP_SECRET;
 const axios = require("axios")
 
 // CHECK TOKEN TO ENSURE LOGGED IN§
@@ -243,10 +242,7 @@ router.put("/resetPasswordToken", (req, res) => {
           });
         } else {
           console.log("RESULT", result[0].mobile)
-          // let email = req.body.email;
           let tokenA = totp.generate(otp_secret);
-          // res.json({ token: tokenA });
-
           let smstoken = process.env.SMSToken;
           params = {
             to: `${result[0].mobile}`,
@@ -278,10 +274,6 @@ router.put("/resetPasswordToken", (req, res) => {
               };
               res.json(data);
             });
-
-
-
-
         }
       }
     });
