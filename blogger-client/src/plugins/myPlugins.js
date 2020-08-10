@@ -8,7 +8,7 @@ const MyPlugin = {
       },
       methods: {
         sizeOfFile() {
-          if (this.file.size > 20000000) {
+          if (this.file.size > 1000000) {
             this.file = [];
             this.snackBarMessage = "File size cannot exceed 20Mb";
             return (this.snackbar = true);
@@ -54,6 +54,7 @@ const MyPlugin = {
         async uploadCoverFiles() {
           this.progressBarActive = true;
           try {
+            this.sizeOfFile();
             var formData = new FormData();
             formData.append("file", this.file);
             let response = await DirectoryService.uploadCoverImage(formData);
@@ -61,7 +62,7 @@ const MyPlugin = {
             let url_id = response.data.url_id;
             let imageInfo = {
               url,
-              url_id,
+              url_id
             };
             this.oldsrc = this.src;
             this.deleteCoverImage();
@@ -76,9 +77,9 @@ const MyPlugin = {
         },
         addNewTags() {
           this.newTags = [];
-          this.articleTags.forEach((el) => {
+          this.articleTags.forEach(el => {
             let tag = el;
-            let result = this.tags.filter((element) => {
+            let result = this.tags.filter(element => {
               return element === tag;
             });
             if (!result.length) {
@@ -123,56 +124,56 @@ const MyPlugin = {
           this.customToolbar = [
             [
               {
-                header: [false, 1, 2, 3, 4, 5, 6],
-              },
+                header: [false, 1, 2, 3, 4, 5, 6]
+              }
             ],
             ["bold", "italic", "underline", "strike"], // toggled buttons
             [
               {
-                align: "",
+                align: ""
               },
               {
-                align: "center",
+                align: "center"
               },
               {
-                align: "right",
+                align: "right"
               },
               {
-                align: "justify",
-              },
+                align: "justify"
+              }
             ],
             ["blockquote", "code-block"],
             [
               {
-                list: "ordered",
+                list: "ordered"
               },
               {
-                list: "bullet",
-              },
+                list: "bullet"
+              }
             ],
             [
               {
-                indent: "-1",
+                indent: "-1"
               },
               {
-                indent: "+1",
-              },
+                indent: "+1"
+              }
             ], // outdent/indent
             [
               {
-                color: [],
+                color: []
               },
               {
-                background: [],
-              },
+                background: []
+              }
             ], // dropdown with defaults from theme
             ["link", "image"],
-            ["clean"], // remove formatting button
+            ["clean"] // remove formatting button
           ];
-        },
-      },
+        }
+      }
     });
-  },
+  }
 };
 
 export default MyPlugin;

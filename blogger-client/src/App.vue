@@ -18,7 +18,7 @@
         </v-system-bar> -->
     </v-container>
     <Header />
-    <chat />
+    <chat v-if="this.$store.state.isLoggedOn" />
 
     <v-main>
       <v-layout text-center wrap>
@@ -38,7 +38,6 @@
 <script>
 import Header from "./components/Header";
 import Chat from "./components/Chat.vue";
-
 
 export default {
   name: "App",

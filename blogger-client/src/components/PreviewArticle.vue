@@ -88,23 +88,23 @@ export default {
     "word_count",
     "publicID",
     "email",
-    "website",
+    "website"
   ],
   data() {
     return {
-      words_in_article: null,
+      words_in_article: null
     };
   },
   methods: {
     change(event) {
       this.words_in_article = event.words;
-    },
+    }
   },
   computed: {
     word_count_Article() {
       return this.words_in_article;
-    },
-  },
+    }
+  }
 };
 </script>
 

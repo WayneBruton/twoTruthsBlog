@@ -135,7 +135,7 @@ export default {
   name: "uploadArticle",
   components: {
     VueEditor,
-    PreviewArticle,
+    PreviewArticle
   },
   data() {
     return {
@@ -152,11 +152,11 @@ export default {
       offset: 2,
       src: {
         url: `${process.env.VUE_APP_BASEURL}alejandro-escamilla-10-unsplash.jpg`,
-        url_id: "ancientruins",
+        url_id: "ancientruins"
       },
       originalsrc: {
         url: `${process.env.VUE_APP_BASEURL}alejandro-escamilla-10-unsplash.jpg`,
-        url_id: "ancientruins",
+        url_id: "ancientruins"
       },
       oldsrc: "",
       email: `mailTo:${this.$store.state.email}`,
@@ -173,7 +173,7 @@ export default {
       articleSaved: false,
       articleTags: [],
       tags: [],
-      newTags: [],
+      newTags: []
     };
   },
   watch: {
@@ -185,7 +185,7 @@ export default {
     },
     windowWidth: function() {
       this.resizePage();
-    },
+    }
   },
   computed: {},
   beforeDestroy() {
@@ -204,7 +204,7 @@ export default {
     let response = await DirectoryService.getTags();
     this.articleTags = [];
     this.tags = [];
-    response.data.forEach((el) => {
+    response.data.forEach(el => {
       this.tags.push(el.tag);
     });
     if (this.$store.state.avatar === null) {
@@ -248,7 +248,7 @@ export default {
       let url_id = response.data.url_id;
       let imageInfo = {
         url,
-        url_id,
+        url_id
       };
       this.articleImagesArray.push(imageInfo);
       Editor.insertEmbed(cursorLocation, "image", url);
@@ -280,7 +280,7 @@ export default {
           isDraft: isDraft,
           newTags: JSON.stringify(this.newTags),
           //I AM HERE TO ADD THIS FIELD
-          articleImages: JSON.stringify(this.articleImagesArray),
+          articleImages: JSON.stringify(this.articleImagesArray)
         };
         let response = await DirectoryService.uploadArticle(article);
         if (response.data.Awesome && !isDraft) {
@@ -302,7 +302,7 @@ export default {
         this.snackBarMessage = "You must have at least one tag";
         this.snackbar = true;
       }
-    },
+    }
   },
   beforeRouteLeave(to, from, next) {
     if (
@@ -322,9 +322,9 @@ export default {
         next(false);
       }
     } else {
-      next()
+      next();
     }
-  },
+  }
 };
 </script>
 

@@ -691,21 +691,27 @@ export default {
     },
     //UPLOAD NEW COVER IMAGE
     async uploadFiles() {
-      this.progressBarActive = true;
-      try {
-        this.oldsrc = this.src;
-        var formData = new FormData();
-        formData.append("file", this.file);
-        let response = await DirectoryService.uploadCoverImage(formData);
-        let url_id = response.data.url_id;
-        this.src = url_id;
-        // this.deleteCoverImage();
-        this.progressBarActive = false;
-      } catch (e) {
-        this.snackBarMessage = "There was a problem. Try again later";
+      console.log(this.file.size);
+      if (this.file.size <= 1000000) {
+        this.progressBarActive = true;
+        try {
+          this.oldsrc = this.src;
+          var formData = new FormData();
+          formData.append("file", this.file);
+          let response = await DirectoryService.uploadCoverImage(formData);
+          let url_id = response.data.url_id;
+          this.src = url_id;
+          // this.deleteCoverImage();
+          this.progressBarActive = false;
+        } catch (e) {
+          this.snackBarMessage = "There was a problem. Try again later";
+          this.snackbar = true;
+        } finally {
+          this.progressBarActive = false;
+        }
+      } else {
+        this.snackBarMessage = "File size limited to 1 MB";
         this.snackbar = true;
-      } finally {
-        this.progressBarActive = false;
       }
     },
     //DELETE OLD COVER IMGE WHEN CHANGED

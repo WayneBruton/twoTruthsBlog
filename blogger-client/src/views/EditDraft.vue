@@ -136,7 +136,7 @@ export default {
   name: "editdraft",
   components: {
     VueEditor,
-    PreviewArticle,
+    PreviewArticle
   },
   data() {
     return {
@@ -153,11 +153,11 @@ export default {
       offset: 2,
       src: {
         url: `https://res.cloudinary.com/dqimswgub/image/upload/v1595081198/ancientruins.jpg`,
-        url_id: "ancientruins",
+        url_id: "ancientruins"
       },
       originalsrc: {
         url: `https://res.cloudinary.com/dqimswgub/image/upload/v1595081198/ancientruins.jpg`,
-        url_id: "ancientruins",
+        url_id: "ancientruins"
       },
       oldsrc: "",
       email: `mailTo:${this.$store.state.email}`,
@@ -173,7 +173,7 @@ export default {
       timeOut: 1000,
       articleTags: [],
       tags: [],
-      newTags: [],
+      newTags: []
     };
   },
   watch: {
@@ -185,7 +185,7 @@ export default {
     },
     windowWidth: function() {
       this.resizePage();
-    },
+    }
   },
   computed: {},
   beforeMount() {
@@ -214,7 +214,7 @@ export default {
     this.articleTags = [];
     let existingTags = JSON.parse(response2.data[0].tags);
     if (existingTags.length) {
-      existingTags.forEach((el) => {
+      existingTags.forEach(el => {
         this.articleTags.push(el);
       });
     }
@@ -224,7 +224,7 @@ export default {
 
     let response = await DirectoryService.getTags();
     this.tags = [];
-    response.data.forEach((el) => {
+    response.data.forEach(el => {
       this.tags.push(el.tag);
     });
     if (this.$store.state.avatar === null) {
@@ -256,9 +256,9 @@ export default {
       this.deleteCurrentArticleImage();
     },
     async discardPost() {
-      this.discardThisPost()
+      this.discardThisPost();
       let credentials = {
-        id: this.articleId,
+        id: this.articleId
       };
       let response = await DirectoryService.deleteEditArticle(credentials);
       console.log(response.data);
@@ -273,7 +273,7 @@ export default {
       let url_id = response.data.url_id;
       let imageInfo = {
         url,
-        url_id,
+        url_id
       };
       this.articleImagesArray.push(imageInfo);
       Editor.insertEmbed(cursorLocation, "image", url);
@@ -281,7 +281,7 @@ export default {
       this.progressBarActive = false;
     },
     size() {
-      this.sizeOfFile()
+      this.sizeOfFile();
     },
     async publishArticle(event) {
       this.addNewTag();
@@ -305,7 +305,7 @@ export default {
           tags: JSON.stringify(this.articleTags),
           isDraft: isDraft,
           newTags: JSON.stringify(this.newTags),
-          articleImages: JSON.stringify(this.articleImagesArray),
+          articleImages: JSON.stringify(this.articleImagesArray)
         };
         let response = await DirectoryService.saveArticle(article);
         if (response.data.Awesome && !isDraft) {
@@ -319,11 +319,11 @@ export default {
         this.snackBarMessage = "You must have at least one tag";
         this.snackbar = true;
       }
-    },
+    }
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
-  },
+  }
 };
 </script>
 

@@ -106,7 +106,9 @@
             <v-expansion-panels popout color="indigo">
               <v-expansion-panel dark color="indigo">
                 <v-expansion-panel-header dark color="indigo" class="header"
-                  ><h2 style="color: white;">Comments</h2></v-expansion-panel-header
+                  ><h2 style="color: white;">
+                    Comments
+                  </h2></v-expansion-panel-header
                 >
                 <v-expansion-panel-content>
                   <br />
@@ -469,14 +471,14 @@ export default {
     followingText: "follow",
     snackbar: false,
     snackBarMessage: "",
-    timeOut: 3000,
+    timeOut: 3000
   }),
   components: {},
   async beforeMount() {},
   watch: {
     windowWidth: function() {
       this.resizePage();
-    },
+    }
   },
   async mounted() {
     this.windowWidth = window.innerWidth;
@@ -505,10 +507,10 @@ export default {
       this.cards.title = this.cards.title.toUpperCase();
       this.publicID = this.cards.avatar;
       this.votedMembers = [];
-      response.data[1].forEach((el) => {
+      response.data[1].forEach(el => {
         this.votedMembers.push(el.member);
       });
-      let thisMember = this.votedMembers.filter((el) => {
+      let thisMember = this.votedMembers.filter(el => {
         return el === this.$store.state.userId;
       });
       this.votedBefore = [];
@@ -538,10 +540,10 @@ export default {
       let query = search.replace("?", "").split("=");
       let credentials = query[query.length - 1];
       let comments = {
-        id: credentials,
+        id: credentials
       };
       let commentsResponse = await DirectoryService.getComments(comments);
-      commentsResponse.data.forEach((el) => {
+      commentsResponse.data.forEach(el => {
         el.currentUser = this.$store.state.userId;
         el.writtenBy = this.cards.member;
       });
@@ -570,7 +572,7 @@ export default {
           memberName: this.$store.state.userName,
           commentBy: targetID,
           articleNumber: this.currentArticle,
-          comment: this.addComment,
+          comment: this.addComment
         };
         await DirectoryService.addComment(credentials);
         this.addComment = "";
@@ -584,7 +586,7 @@ export default {
     async deleteComment(event) {
       let targetID = parseInt(event.currentTarget.id);
       let credentials = {
-        id: targetID,
+        id: targetID
       };
       await DirectoryService.deleteComment(credentials);
       this.getComments();
@@ -592,7 +594,7 @@ export default {
     async deleteReply(event) {
       let targetID = parseInt(event.currentTarget.id);
       let credentials = {
-        id: targetID,
+        id: targetID
       };
       await DirectoryService.deleteReply(credentials);
       this.getComments();
@@ -615,7 +617,7 @@ export default {
           commentBy: this.$store.state.userId,
           articleNumber: targetID,
           replyTo: this.currentCommentID,
-          comment: this.replyComment,
+          comment: this.replyComment
         };
         await DirectoryService.addReply(credentials);
         this.dialog = false;
@@ -635,7 +637,7 @@ export default {
       let followingAndBookmarked = {
         member: this.$store.state.userId,
         member_following: this.cards.member,
-        article: this.cards.id,
+        article: this.cards.id
       };
       let followingResponse = await DirectoryService.followingAndBookmarked(
         followingAndBookmarked
@@ -695,7 +697,7 @@ export default {
         let credentials = {
           articleID: this.cards.id,
           userID: this.$store.state.userId,
-          claps: this.claps,
+          claps: this.claps
         };
         let response = await DirectoryService.addLikes(credentials);
         console.log(response.data);
@@ -716,7 +718,7 @@ export default {
       let bookMark = {
         member: this.$store.state.userId,
         article: this.cards.id,
-        toBookMark: toBookMark,
+        toBookMark: toBookMark
       };
       await DirectoryService.bookMark(bookMark);
     },
@@ -738,20 +740,20 @@ export default {
       let follow = {
         member: this.$store.state.userId,
         member_following: this.cards.member,
-        toFollow: toFollow,
+        toFollow: toFollow
       };
       await DirectoryService.follow(follow);
-    },
+    }
   },
   async beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
     if (this.tokenValid) {
       let credentials = {
-        articleID: this.cards.id,
+        articleID: this.cards.id
       };
       await DirectoryService.updateArticleLikes(credentials);
     }
-  },
+  }
 };
 </script>
 

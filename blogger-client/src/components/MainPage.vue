@@ -2,7 +2,7 @@
   <div class="holding">
     <v-container>
       <v-col>
-          <!-- <chat /> -->
+        <!-- <chat /> -->
 
         <v-container v-if="viewLook !== 'mdi-view-grid'">
           <h1 v-if="this.$store.state.isLoggedOn">
@@ -162,10 +162,10 @@ export default {
     viewLook: "mdi-view-grid",
     flex: 12,
     offset: 0,
-    loggedIn: false,
+    loggedIn: false
   }),
   components: {
-    SignupPopup,
+    SignupPopup
     // Chat
   },
   watch: {
@@ -176,7 +176,7 @@ export default {
     },
     windowWidth: function() {
       this.resizePage();
-    },
+    }
   },
   async mounted() {
     this.loggedIn = this.$store.state.isLoggedOn;
@@ -207,14 +207,14 @@ export default {
     },
     resizePage() {
       if (this.windowWidth < 768) {
-        this.cards.forEach((element) => {
+        this.cards.forEach(element => {
           element.flex = 12;
           this.flex = 12;
           this.offset = 0;
           element.title = element.title.toUpperCase();
         });
       } else {
-        this.cards.forEach((element) => {
+        this.cards.forEach(element => {
           this.flex = 10;
           this.offset = 1;
           if (this.cards.length < 3) {
@@ -237,8 +237,8 @@ export default {
       } else {
         this.viewLook = "mdi-format-list-bulleted";
       }
-    },
-  },
+    }
+  }
 };
 </script>
 

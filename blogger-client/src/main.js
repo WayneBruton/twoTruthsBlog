@@ -11,7 +11,7 @@ var VueCookie = require("vue-cookie");
 import VueMask from "v-mask";
 import MyPlugin from "./plugins/myPlugins";
 Vue.use(MyPlugin);
-Vue.use(VueMask); 
+Vue.use(VueMask);
 
 VueSanitize.defaults.allowedTags = ["p"];
 VueSanitize.defaults.disallowedTagsMode = "discard";

@@ -13,13 +13,13 @@ import MainPage from "@/components/MainPage.vue";
 export default {
   name: "home",
   components: {
-    MainPage,
+    MainPage
     // Chat,
   },
   data() {
     return {
-      test: process.env.VUE_APP_TESTWORDS,
+      test: process.env.VUE_APP_TESTWORDS
     };
-  },
+  }
 };
 </script>

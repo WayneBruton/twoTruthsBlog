@@ -73,7 +73,9 @@
               :to="{ name: item.name }"
             >
               <v-list-item-title>{{ item.title }}</v-list-item-title>
-              <v-icon>{{ item.icon }}</v-icon>
+              <v-icon color="indigo" style="margin-right: 5px;">{{
+                item.icon
+              }}</v-icon>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -95,7 +97,9 @@
               :to="{ name: item.name }"
             >
               <v-list-item-title>{{ item.title }}</v-list-item-title>
-              <v-icon>{{ item.icon }}</v-icon>
+              <v-icon color="indigo" style="margin-right: 5px;">{{
+                item.icon
+              }}</v-icon>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -151,14 +155,7 @@ export default {
         id: "setup"
       },
 
-      {
-        title: "Logout",
-        name: "logout",
-        icon: "mdi-logout",
-        show: 1,
-        menu: 1,
-        id: "logout"
-      },
+      
       {
         title: "About",
         name: "about",
@@ -190,6 +187,14 @@ export default {
         show: 3,
         menu: 1,
         id: "contact"
+      },
+      {
+        title: "Logout",
+        name: "logout",
+        icon: "mdi-logout",
+        show: 1,
+        menu: 1,
+        id: "logout"
       }
     ]
   }),
