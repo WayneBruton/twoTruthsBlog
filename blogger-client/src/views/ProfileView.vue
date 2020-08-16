@@ -2,6 +2,10 @@
   <div class="about">
     <br />
     <br />
+    <v-btn color="#111d5e" text icon @click="back">
+      <v-icon color="#111d5e" x-large>mdi-chevron-left</v-icon>
+      <strong>Back</strong>
+    </v-btn>
     <v-container fluid v-if="this.$store.state.isLoggedOn">
       <v-row dense justify-center>
         <v-col :cols="flex" :offset="offset">
@@ -105,9 +109,9 @@ export default {
     let query = search.replace("?", "").split("=");
     // let credentials = query[query.length - 1];
     let credentials = { id: query[query.length - 1] };
-    console.log(credentials);
+    // console.log(credentials);
     let response = await DirectoryService.viewProfile(credentials);
-    console.log(response.data);
+    // console.log(response.data);
     this.email = response.data[0][0].email;
     this.name = response.data[0][0].name;
     this.website = response.data[0][0].website;
@@ -124,6 +128,9 @@ export default {
     }
   },
   methods: {
+    back() {
+      this.$router.back();
+    },
     onResize() {
       this.windowWidth = window.innerWidth;
     },

@@ -3,7 +3,6 @@
     <v-container>
       <v-layout wrap>
         <v-flex mb-5 xs12 md-8 offset-md1>
-    
           <v-flex justify-center mb-2 mt-5 xs12>
             <h1>About PerfectStaff</h1>
           </v-flex>
@@ -195,4 +194,3 @@ h1 {
   color: #010a43;
 }
 </style>
-

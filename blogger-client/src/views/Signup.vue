@@ -27,11 +27,13 @@
         > -->
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-text-field
+              ref="nameInput"
               v-model="name"
               :counter="20"
               maxValue="20"
               :rules="nameRules"
               label="Name"
+              @blur="checkName"
               required
             ></v-text-field>
             <v-text-field
@@ -57,6 +59,7 @@
               :rules="passwordRules"
               label="Password"
               :append-icon="value ? 'mdi-eye' : 'mdi-eye-off'"
+              color="#111d5e"
               @click:append="() => (value = !value)"
               :type="value ? 'password' : 'text'"
               required
@@ -70,6 +73,7 @@
             <p v-if="repeatPasswordError">{{ repeatPasswordErrorMessage }}</p>
             <v-checkbox
               v-model="checkbox"
+              color="#111d5e"
               :rules="[v => !!v || 'You must agree to continue!']"
               label="Do you agree to behave as per our terms & conditions?"
               required
@@ -129,7 +133,7 @@ export default {
       v => (v && v.length <= 20) || "Name must be less than 15 characters"
     ],
     // email: "",
-    email: "waynebruton@icloud.com",
+    email: "waynebruton@icloud.coma",
     emailRules: [
       v => !!v || "E-mail is required",
       v => /.+@.+\..+/.test(v) || "E-mail must be valid"
@@ -149,6 +153,7 @@ export default {
     snackbar: false,
     snackbarMessage: ""
   }),
+  components: {},
   mounted() {},
   methods: {
     correctNumber() {
@@ -166,7 +171,21 @@ export default {
         adjustNumber = adjustNumber.split("-");
         adjustNumber = adjustNumber.join("");
         this.mobileForDB = adjustNumber;
-        console.log(this.mobileForDB);
+        // console.log(this.mobileForDB);
+      }
+    },
+    async checkName() {
+      let nameCheck = await DirectoryServices.checkName({ name: this.name });
+      // console.log("Name Check", nameCheck.data);
+      if (nameCheck.data.length) {
+        this.snackbarMessage = "Your Name must be unique";
+        this.snackbar = true;
+        this.name = "";
+        setTimeout(() => {
+          this.$nextTick(() => {
+            this.$refs.nameInput.focus();
+          });
+        }, 0);
       }
     },
     async createMember() {
@@ -186,9 +205,9 @@ export default {
       this.$refs.form.reset();
       this.checkbox = false;
     },
-    resetValidation() {
-      this.$refs.form.resetValidation();
-    },
+    // resetValidation() {
+    //   this.$refs.form.resetValidation();
+    // },
     async checkEmail() {
       let email = {
         email: this.email

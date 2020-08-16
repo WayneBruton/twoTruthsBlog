@@ -4,8 +4,24 @@ export default {
   startApp() {
     return Api().get(`/startApp`);
   },
+  yourInterests(credentials) {
+    // console.log(credentials)
+    return Api().put(`/yourInterests`, credentials);
+  },
+  yourLatestInterests(credentials) {
+    return Api().put(`/yourLatestInterests`, credentials);
+  },
+  youFollowing(credentials) {
+    return Api().put(`/youFollowing`, credentials);
+  },
+  youFollowingArticles(credentials) {
+    return Api().put(`/youFollowingArticles`, credentials);
+  },
   checkEmail(credentials) {
     return Api().put(`/checkEmail`, credentials);
+  },
+  checkName(credentials) {
+    return Api().put(`/checkName`, credentials);
   },
   createMember(credentials) {
     return Api().post(`/createMember`, credentials);
@@ -48,6 +64,14 @@ export default {
   },
   getArticle(credentials) {
     return Api().get(`/getArticle/${credentials}`);
+  },
+  recentArticles(credentials) {
+    // console.log(credentials)
+    return Api().put(`/recentArticles`, credentials);
+  },
+  searchArticles(credentials) {
+    // console.log(credentials)
+    return Api().put(`/searchArticles`, credentials);
   },
   getDraft(credentials) {
     return Api().get(`/getDraft/${credentials}`);

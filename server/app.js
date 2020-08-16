@@ -49,7 +49,7 @@ let members = [];
 let users = {};
 io.on("connection", function (socket) {
   console.log("Connected", socket.id);
-  console.log("members", members);
+  // console.log("members", members);
   socket.on("NEW_USER", function (data) {
     if (data.user in users) {
       socket.nickname = data.user;
@@ -66,7 +66,7 @@ io.on("connection", function (socket) {
       } else {
         console.log("user exists", data.user);
       }
-      console.log(members);
+      // console.log(members);
     } else {
       socket.nickname = data.user;
       users[socket.nickname] = socket;
@@ -81,7 +81,7 @@ io.on("connection", function (socket) {
       loggedOnUsers.push(el.nickname);
     });
     users[data.user].emit("USERS", loggedOnUsers);
-    console.log("members", members);
+    // console.log("members", members);
   });
   // socket.on("USERS", function (data) {
   //   let loggedOnUsers = []
@@ -94,25 +94,25 @@ io.on("connection", function (socket) {
   // })
   socket.on("SEND_MESSAGE", function (data) {
     var messageTo = data.messageTo;
-    console.log("MessageTo", messageTo);
-    console.log(data);
+    // console.log("MessageTo", messageTo);
+    // console.log(data);
     let member = members.filter((el) => {
       return el.nickname === messageTo;
     });
     if (member.length > 0) {
       users[messageTo].emit("MESSAGE", data);
       users[data.user].emit("MESSAGE", data);
-      console.log("OK it worked");
-      console.log("members", members);
+      // console.log("OK it worked");
+      // console.log("members", members);
     } else {
-      console.log("OOPs");
+      // console.log("OOPs");
       data.message = `User has left the chat`;
       users[data.user].emit("MESSAGE", data);
     }
-    console.log("The message is to", member, messageTo);
+    // console.log("The message is to", member, messageTo);
   });
   socket.on("EXIT", function (data) {
-    console.log("DATA", data);
+    // console.log("DATA", data);
     members = members.filter((el) => {
       return el.nickname !== data.user;
     });
@@ -126,14 +126,14 @@ io.on("connection", function (socket) {
     }
   });
   socket.on("disconnect", () => {
-    console.log("Socket disconnected");
-    console.log(socket.id);
-    console.log(socket.nickname);
+    console.log("Socket disconnected with id:", socket.id, socket.nickname);
+    // console.log(socket.id);
+    // console.log(socket.nickname);
     members = members.filter((el) => {
       return el.id !== socket.id;
     });
     delete socket; 
-    console.log("members after disconnect", members);
+    // console.log("members after disconnect", members);
   });
 });
 

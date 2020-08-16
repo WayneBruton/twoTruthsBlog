@@ -52,9 +52,16 @@
           <small>*indicates required field</small>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="#010a43" text @click="reset">Reset</v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="#010a43" text @click="send">Send</v-btn>
+
+          <v-btn color="#010a43" text @click="reset"
+            ><v-icon color="#010a43">mdi-lock-reset</v-icon>Reset</v-btn
+          >
+          <v-spacer></v-spacer>
+          <v-btn color="#010a43" text @click="send"
+            ><v-icon color="#010a43">mdi-email-send</v-icon>Send</v-btn
+          >
+          <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
       <v-snackbar v-model="snackbar" :timeout="timeOut" bottom top>
@@ -97,7 +104,7 @@ export default {
   },
   async mounted() {
     // try {
-      this.isLoggedIn = this.$store.state.isLoggedOn;
+    this.isLoggedIn = this.$store.state.isLoggedOn;
     //   if (this.isLoggedIn) {
     //     this.userID = this.$store.state.userId;
     //     let credentials = {
@@ -178,4 +185,3 @@ export default {
   min-height: 95vh;
 }
 </style>
-

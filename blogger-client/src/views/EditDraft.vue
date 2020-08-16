@@ -70,12 +70,13 @@
             chips
             deletable-chips
             dense
-            item-color="indigo"
+            item-color="#111d5e"
           ></v-combobox>
         </v-col>
       </v-row>
       <br />
       <PreviewArticle
+        v-if="content"
         :title="title"
         :flex="flex"
         :offset="offset"
@@ -93,7 +94,7 @@
           <div class="publish">
             <v-btn
               @click="discardPost"
-              color="primary"
+              color="#111d5e"
               text
               style="margin-bottom: 5px;"
             >
@@ -101,7 +102,7 @@
             </v-btn>
             <v-btn
               id="draft"
-              color="primary"
+              color="#111d5e"
               text
               @click="publishArticle($event)"
               style="margin-bottom: 5px;"
@@ -110,7 +111,7 @@
             </v-btn>
             <v-btn
               id="publish"
-              color="primary"
+              color="#111d5e"
               text
               @click="publishArticle($event)"
               style="margin-bottom: 5px;"
@@ -130,13 +131,13 @@
 
 <script>
 import { VueEditor } from "vue2-editor";
-import PreviewArticle from "../components/PreviewArticle";
+// import PreviewArticle from "../components/PreviewArticle";
 import DirectoryService from "../services/DirectoryServices";
 export default {
   name: "editdraft",
   components: {
     VueEditor,
-    PreviewArticle
+    PreviewArticle: () => import("../components/PreviewArticle")
   },
   data() {
     return {
@@ -145,9 +146,11 @@ export default {
       preset: `${process.env.VUE_APP_PRESET}`,
       publicID: this.$store.state.avatar,
       content: "<p>Enter images and article here</p>",
+      originalContent: "",
       articleId: null,
       articleImages: 0,
       articleImagesArray: [],
+      originalarticleImagesArray: [],
       imageToDelete: {},
       flex: 8,
       offset: 2,
@@ -162,7 +165,9 @@ export default {
       oldsrc: "",
       email: `mailTo:${this.$store.state.email}`,
       title: "Sample Title & Image",
+      originalTitle: "",
       credit: "Credit goes here",
+      originalCredit: "",
       word_count: 100,
       website: this.$store.state.website,
       file: null,
@@ -173,7 +178,8 @@ export default {
       timeOut: 1000,
       articleTags: [],
       tags: [],
-      newTags: []
+      newTags: [],
+      articleSaved: false
     };
   },
   watch: {
@@ -203,14 +209,18 @@ export default {
     let query = search.replace("?", "").split("=");
     let credentials = query[query.length - 1];
     let response2 = await DirectoryService.getDraft(credentials);
-    console.log("RESPONSE 2 ", response2.data);
+    // console.log("RESPONSE 2 ", response2.data);
     this.articleId = response2.data[0].id;
-    console.log(this.articleId);
+    // console.log(this.articleId);
     this.content = response2.data[0].content;
+    this.originalContent = response2.data[0].content;
     this.title = response2.data[0].title;
+    this.originalTitle = response2.data[0].title;
     this.credit = response2.data[0].credit;
+    this.originalCredit = response2.data[0].credit;
     this.src.url_id = response2.data[0].coverImgID;
-    console.log(this.src);
+    this.originalsrc.url_id = response2.data[0].coverImgID;
+    // console.log(this.src);
     this.articleTags = [];
     let existingTags = JSON.parse(response2.data[0].tags);
     if (existingTags.length) {
@@ -220,7 +230,10 @@ export default {
     }
 
     this.articleImagesArray = JSON.parse(response2.data[0].articleImages);
-    console.log(this.articleImagesArray);
+    this.originalarticleImagesArray = JSON.parse(
+      response2.data[0].articleImages
+    );
+    // console.log(this.articleImagesArray);
 
     let response = await DirectoryService.getTags();
     this.tags = [];
@@ -260,8 +273,9 @@ export default {
       let credentials = {
         id: this.articleId
       };
-      let response = await DirectoryService.deleteEditArticle(credentials);
-      console.log(response.data);
+      // let response = await DirectoryService.deleteEditArticle(credentials);
+      await DirectoryService.deleteEditArticle(credentials);
+      // console.log(response.data);
       this.$router.push({ name: "setup" });
     },
     async handleImageAdded(file, Editor, cursorLocation, resetUploader) {
@@ -311,9 +325,11 @@ export default {
         if (response.data.Awesome && !isDraft) {
           this.snackBarMessage = "Successfully Published";
           this.snackbar = true;
+          this.articleSaved = true;
         } else if (response.data.Awesome && isDraft) {
           this.snackBarMessage = "Saved to Drafts";
           this.snackbar = true;
+          this.articleSaved = true;
         }
       } else {
         this.snackBarMessage = "You must have at least one tag";
@@ -323,6 +339,31 @@ export default {
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
+  },
+  beforeRouteLeave(to, from, next) {
+    if (
+      !this.articleSaved &&
+      (this.content !== this.originalContent ||
+        this.src.url_id !== this.originalsrc.url_id ||
+        this.title !== this.originalTitle ||
+        this.credit !== this.originalCredit ||
+        JSON.stringify(this.originalarticleImagesArray) !=
+          JSON.stringify(this.articleImagesArray))
+    ) {
+      const answer = window.confirm(
+        "Do you really want to leave? you have unsaved changes!"
+      );
+      if (answer) {
+        // console.log("Leave", answer);
+        this.discardThisPost();
+        next();
+      } else {
+        // console.log("STAY", answer);
+        next(false);
+      }
+    } else {
+      next();
+    }
   }
 };
 </script>

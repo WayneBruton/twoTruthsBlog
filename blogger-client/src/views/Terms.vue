@@ -3,6 +3,11 @@
     <v-container>
       <v-layout wrap>
         <v-flex mb-5 xs12 md8 offset-md2>
+          <v-btn color="#111d5e" text icon @click="back">
+            <v-icon color="#111d5e" x-large>mdi-chevron-left</v-icon>
+            <strong>Back</strong>
+          </v-btn>
+          <br /><br />
           <h1>Terms & Conditions</h1>
           <br />
           <p>
@@ -243,7 +248,7 @@
             email us
             <a href="mailto:support@perfect-staff.com">email</a>
           </p>
-          <v-btn dark color="indigo" @click="back">Return</v-btn>
+          <!-- <v-btn dark color="indigo" @click="back">Return</v-btn> -->
         </v-flex>
       </v-layout>
     </v-container>

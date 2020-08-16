@@ -68,13 +68,14 @@
             chips
             deletable-chips
             dense
-            item-color="indigo"
+            item-color="#111d5e"
           ></v-combobox>
         </v-col>
       </v-row>
       <br />
 
       <PreviewArticle
+        v-if="content"
         :title="title"
         :flex="flex"
         :offset="offset"
@@ -92,7 +93,7 @@
           <div class="publish">
             <v-btn
               @click="discardPost"
-              color="primary"
+              color="#111d5e"
               text
               style="margin-bottom: 5px;"
             >
@@ -100,7 +101,7 @@
             </v-btn>
             <v-btn
               id="draft"
-              color="primary"
+              color="#111d5e"
               text
               @click="publishArticle($event)"
               style="margin-bottom: 5px;"
@@ -109,7 +110,7 @@
             </v-btn>
             <v-btn
               id="publish"
-              color="primary"
+              color="#111d5e"
               text
               @click="publishArticle($event)"
               style="margin-bottom: 5px;"
@@ -130,12 +131,12 @@
 <script>
 import { VueEditor } from "vue2-editor";
 import DirectoryService from "../services/DirectoryServices";
-import PreviewArticle from "../components/PreviewArticle";
+// import PreviewArticle from "../components/PreviewArticle";
 export default {
   name: "uploadArticle",
   components: {
     VueEditor,
-    PreviewArticle
+    PreviewArticle: () => import("../components/PreviewArticle")
   },
   data() {
     return {
@@ -144,7 +145,7 @@ export default {
       // error: "",
       preset: `${process.env.VUE_APP_PRESET}`,
       publicID: this.$store.state.avatar,
-      content: "<p>Enter images and article here</p>",
+      content: "",
       articleImages: 0,
       articleImagesArray: [],
       imageToDelete: {},
@@ -307,18 +308,17 @@ export default {
   beforeRouteLeave(to, from, next) {
     if (
       !this.articleSaved &&
-      (this.content !== "<p>Enter images and article here</p>" ||
-        this.src.url_id !== "ancientruins")
+      (this.content !== "" || this.src.url_id !== "ancientruins")
     ) {
       const answer = window.confirm(
         "Do you really want to leave? you have unsaved changes!"
       );
       if (answer) {
-        console.log("Leave", answer);
+        // console.log("Leave", answer);
         this.discardThisPost();
         next();
       } else {
-        console.log("STAY", answer);
+        // console.log("STAY", answer);
         next(false);
       }
     } else {

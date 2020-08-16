@@ -387,6 +387,50 @@ router.put("/deleteReply", (req, res) => {
     connection.release();
   });
 });
+//SEARCH ARTICLES
+router.put('/searchArticles', (req, res) => {
+  console.log(req.body.searchTerms)
+  let mysql = `SELECT id, title, member_name, coverimgID, readTime, MATCH (title,content,member_name) AGAINST ('${req.body.searchTerms}') as score FROM articles WHERE MATCH (title,content,member_name) AGAINST ('${req.body.searchTerms}') > 0 and isDraft = 0 ORDER BY score DESC`;
+  
+  // console.log(mysql)
+  pool.getConnection(function (err, connection) {
+    if (err) {
+      connection.release();
+      resizeBy.send("Error with connection");
+    }
+    connection.query(mysql, function (error, result) {
+      if (error) throw error;
+      result.forEach((el) => {
+        el.title = el.title.toUpperCase()
+      })
+      console.log(result)
+      res.json(result);
+    });
+    connection.release();
+  });
+})
+// GET RECENT ARTICLES
+router.put('/recentArticles', (req, res) => {
+  let mysql = `select a.id, a.member, a.coverImgURL, a.coverImgID, a.title, a.readTime
+                  from articles a 
+                  where 
+                  a.id <> ${req.body.articleId} and a.member = ${req.body.authorId} order by a.id desc limit 3`;
+  // console.log(mysql)
+  pool.getConnection(function (err, connection) {
+    if (err) {
+      connection.release();
+      resizeBy.send("Error with connection");
+    }
+    connection.query(mysql, function (error, result) {
+      if (error) throw error;
+      console.log(result)
+      res.json(result);
+    });
+    connection.release();
+  });
+})
+
+
 
 //Navigate to the article
 router.get("/getArticle/:number", checktoken, (req, res) => {

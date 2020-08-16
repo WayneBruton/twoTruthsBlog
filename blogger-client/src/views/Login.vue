@@ -42,7 +42,7 @@
                 Lost Password
               </v-btn>
               <v-btn
-                color="warning"
+                color="red"
                 text
                 v-if="!emailExists && email !== ''"
                 :to="{ name: 'signup' }"
@@ -82,9 +82,9 @@
                 Reset Password
               </v-btn>
             </div>
-            <div v-if="passwordResetToken !== 0">
+            <!-- <div v-if="passwordResetToken !== 0">
               {{ passwordResetToken }}
-            </div>
+            </div> -->
             <v-snackbar v-model="snackbar" top>
               {{ errorMessage }}
               <v-btn color="pink" text @click="snackbar = false">
@@ -167,7 +167,7 @@ export default {
         email: this.email
       };
       let response = await DirectoryServices.resetPasswordToken(user);
-      console.log(response.data.token);
+      // console.log(response.data.token);
       this.passwordResetToken = response.data.token;
       this.errorMessage = "An OTP has been sent to you.";
       this.snackbar = true;
@@ -192,7 +192,7 @@ export default {
           password: this.newPassword
         };
         let response = await DirectoryServices.resetPassword(user);
-        console.log(response.data);
+        // console.log(response.data);
         if (response.data.success) {
           this.errorMessage = "Success.";
           this.passwordResetToken = null;
@@ -214,6 +214,7 @@ export default {
       let response = await DirectoryServices.checkEmail(email);
       if (response.data.length === 0) {
         this.emailExists = false;
+        this.errorMessage = "Email not on system, Signup?";
         this.snackbar = true;
       } else {
         this.emailExists = true;

@@ -1,6 +1,5 @@
 <template>
   <div class="about temp">
-    
     <v-flex
       wrap
       xs12
@@ -8,7 +7,7 @@
       sm8
       lg8
       xl8
-      offset-md2 
+      offset-md2
       offset-xl2
       offset-sm2
       offset-lg2
@@ -29,12 +28,13 @@
             :key="i"
             color="grey"
             dark
-         
           >
-            <v-expansion-panel-header color="indigo" dark class="header">{{
+            <v-expansion-panel-header color="#111d5e" dark class="header">{{
               item.title
             }}</v-expansion-panel-header>
-            <v-expansion-panel-content style="background-color: white; color:black;">
+            <v-expansion-panel-content
+              style="background-color: white; color:black;"
+            >
               {{ item.explanation }}
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -117,11 +117,10 @@ export default {
           title: "I am an NPO or NGO, do I get a special rate?",
           explanation: `If you are a registered NGO, you can contact us in that regard.`
         }
-      ],
+      ]
     };
   },
-  beforeMount() {
-  }
+  beforeMount() {}
 };
 </script>
 
@@ -130,4 +129,3 @@ export default {
   font-size: 105%;
 }
 </style>
-

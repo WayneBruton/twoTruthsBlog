@@ -56,6 +56,21 @@ router.put("/checkEmail", (req, res) => {
   });
 });
 
+router.put("/checkName", (req, res) => {
+  let mysql = `select * from members where name = '${req.body.name}'`;
+  pool.getConnection(function (err, connection) {
+    if (err) {
+      connection.release();
+      resizeBy.send("Error with connection");
+    }
+    connection.query(mysql, function (error, result) {
+      if (error) throw error;
+      res.json(result);
+    });
+    connection.release();
+  });
+});
+
 //ARE FOLLOWING AND BOOKMARKED??
 router.put("/followingandbookmarked", (req, res) => {
   const mysql1 = `select * from bookmark where member = ${req.body.member} and article = ${req.body.article}`;

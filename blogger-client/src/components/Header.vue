@@ -1,24 +1,8 @@
 <template>
   <div>
-    <!-- <v-system-bar
-      v-if="!this.$store.state.isLoggedOn"
-      sticky
-      color="lime"
-      :height="height"
-      :lights-out="lightsOut"
-      :window="window"
-    >
-      <v-icon>mdi-gmail</v-icon>
-      <span>10 unread emails</span>
-      <v-spacer></v-spacer>
-      <v-icon>mdi-wifi-strength-4</v-icon>
-      <v-icon>mdi-signal-cellular-outline</v-icon>
-      <v-icon>mdi-battery</v-icon>
-      <span>12:30</span>
-    </v-system-bar> -->
-
-    <v-app-bar app color="indigo" dark>
-      <!-- <v-app-bar app color="transparent" elevation="0" z-index="100"> -->
+    <v-app-bar app color="#111d5e" dark style="opacity:1">
+      <!-- <v-app-bar app color="white" elevation="1" z-index="100" height="100"> -->
+      <!-- <v-toolbar app color="white" elevation="1" z-index="100"> -->
       <div class="d-flex align-center">
         <v-img
           v-if="this.$route.name === 'home'"
@@ -27,21 +11,28 @@
           contain
           transition="scale-transition"
           width="40"
-          src="https://cdn.vuetifyjs.com/images/cards/plane.jpg"
+          :src="src"
         />
-        <div v-if="this.$route.name !== 'home'">
-          <v-icon @click="home" large>mdi-chevron-left</v-icon>
+        <div class="returnHome" v-if="this.$route.name !== 'home'">
+          <v-icon @click="home" dark x-large>mdi-chevron-left</v-icon>
         </div>
 
         <div v-if="windowWidth > 768">
-          <h1 @click="home">Two truths and a lie</h1>
+          <h1 class="returnHome" @click="home">Idea Cafe</h1>
         </div>
         <div v-else>
-          <h2 @click="home">Two truths and a lie</h2>
+          <h3 class="returnHome" @click="home">Idea Cafe</h3>
         </div>
       </div>
+      <v-spacer
+        v-if="this.$store.state.isLoggedOn && this.windowWidth > 768"
+      ></v-spacer>
 
+      <div v-if="this.$store.state.isLoggedOn && this.windowWidth > 768">
+        <chat />
+      </div>
       <v-spacer></v-spacer>
+
       <div v-if="windowWidth > 768" style="display: flex; padding-top: 12px;">
         <div v-for="item in activeItems" :key="item.id">
           <v-btn
@@ -73,7 +64,7 @@
               :to="{ name: item.name }"
             >
               <v-list-item-title>{{ item.title }}</v-list-item-title>
-              <v-icon color="indigo" style="margin-right: 5px;">{{
+              <v-icon color="#111d5e" style="margin-right: 5px;">{{
                 item.icon
               }}</v-icon>
             </v-list-item>
@@ -81,10 +72,10 @@
         </v-menu>
       </div>
       <div v-else>
-        <v-menu bottom left offsetY min-width="100%" max-width="100%">
+        <v-menu bottom left offsetY min-width="80%" max-width="80%">
           <template v-slot:activator="{ on }">
             <v-btn dark icon v-on="on">
-              <v-icon>mdi-dots-vertical</v-icon>
+              <v-icon>mdi-menu</v-icon>
             </v-btn>
           </template>
           <v-list>
@@ -97,7 +88,7 @@
               :to="{ name: item.name }"
             >
               <v-list-item-title>{{ item.title }}</v-list-item-title>
-              <v-icon color="indigo" style="margin-right: 5px;">{{
+              <v-icon color="#111d5e" style="margin-right: 5px;">{{
                 item.icon
               }}</v-icon>
             </v-list-item>
@@ -109,9 +100,11 @@
 </template>
 
 <script>
+import Chat from "./Chat";
 export default {
   data: () => ({
     windowWidth: null,
+    src: require("../assets/Logo.png"),
     items: [
       //MENU 1 = DROPDOWN
       {
@@ -155,7 +148,6 @@ export default {
         id: "setup"
       },
 
-      
       {
         title: "About",
         name: "about",
@@ -198,6 +190,9 @@ export default {
       }
     ]
   }),
+  components: {
+    Chat
+  },
   created() {
     this.windowWidth = window.innerWidth;
     window.onresize = () => {
@@ -258,7 +253,7 @@ export default {
 </script>
 
 <style scoped>
-h1:hover {
+.returnHome:hover {
   cursor: pointer;
 }
 </style>

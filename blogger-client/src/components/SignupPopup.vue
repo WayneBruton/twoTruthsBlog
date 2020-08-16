@@ -7,7 +7,7 @@
       transition="dialog-bottom-transition"
     >
       <v-card xs="12">
-        <v-toolbar dark color="indigo">
+        <v-toolbar dark color="#111d5e">
           <v-btn icon dark @click="dialog = false">
             <v-icon>mdi-close</v-icon>
           </v-btn>
@@ -21,7 +21,7 @@
           <v-subheader>Login or Signup</v-subheader>
           <v-list-item>
             <v-list-item-action>
-              <v-btn class="indigo" dark :to="{ name: 'login' }">
+              <v-btn class="#111d5e" dark :to="{ name: 'login' }">
                 <span>Login</span>
                 <v-icon>mdi-login</v-icon>
               </v-btn>
@@ -33,7 +33,7 @@
           </v-list-item>
           <v-list-item>
             <v-list-item-action>
-              <v-btn class="indigo" dark :to="{ name: 'signup' }">
+              <v-btn class="#111d5e" dark :to="{ name: 'signup' }">
                 <span>Signup</span>
 
                 <v-icon>mdi-location-enter</v-icon>

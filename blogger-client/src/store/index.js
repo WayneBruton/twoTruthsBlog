@@ -14,7 +14,9 @@ export default new Vuex.Store({
     avatar: null,
     website: null,
     showEmail: null,
-    aboutMember: null
+    aboutMember: null,
+    viewLook: "mdi-view-grid",
+    cookiesAccepted: false
   },
   mutations: {
     setUser(state, user) {
@@ -34,6 +36,12 @@ export default new Vuex.Store({
       state.userName = null;
       state.avatar = null;
       state.website = null;
+    },
+    changeView(state, data) {
+      state.viewLook = data.viewLook;
+    },
+    acceptCookies(state) {
+      state.cookiesAccepted = true;
     }
   },
   actions: {
@@ -42,6 +50,12 @@ export default new Vuex.Store({
     },
     logout({ commit }) {
       commit("logout");
+    },
+    changeView({ commit }, data) {
+      commit("changeView", data);
+    },
+    acceptCookies({ commit }) {
+      commit("acceptCookies");
     }
   },
   modules: {}

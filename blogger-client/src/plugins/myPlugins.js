@@ -85,7 +85,7 @@ const MyPlugin = {
             if (!result.length) {
               this.newTags.push(tag);
             }
-            console.log(this.newTags);
+            // console.log(this.newTags);
           });
         },
         resizePageSize() {

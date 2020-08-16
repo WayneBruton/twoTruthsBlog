@@ -1,0 +1,174 @@
+<template>
+  <div class="about" v-if="cards.length > 0">
+    <v-col :cols="flex" :offset="offset">
+      <v-card max-width="1000" min-width="100%" class="mx-auto" elevation="1">
+        <v-toolbar color="#111d5e" dark elevation="0">
+          <v-toolbar-title>Following</v-toolbar-title>
+        </v-toolbar>
+        <v-list multiple subheader>
+          <v-list-item
+            v-for="item in cards"
+            :key="item.id"
+            :id="item.id"
+            @click="articleClick($event)"
+          >
+            <v-list-item-content justify-start>
+              <v-list-item-title
+                v-text="item.title"
+                style="font-size: 100%;"
+              ></v-list-item-title>
+              <v-list-item-subtitle>by: {{ item.author }}</v-list-item-subtitle>
+              <v-list-item-subtitle
+                >{{ item.readtime }} min read</v-list-item-subtitle
+              >
+            </v-list-item-content>
+            <v-list-item-action>
+              <cld-image
+                :cloudName="cloudName"
+                :publicId="item.publicId"
+                loading="lazy"
+                :width="width"
+                :height="height"
+              >
+                <cld-transformation crop="fill" quality="auto" angle="0" />
+              </cld-image>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+      </v-card>
+    </v-col>
+    <v-snackbar v-model="snackbar" :timeout="timeOut" bottom top>
+      {{ snackBarMessage }}
+      <v-btn color="pink" text @click="snackbar = false">Close</v-btn>
+    </v-snackbar>
+  </div>
+</template>
+
+<script>
+import DirectoryServices from "../services/DirectoryServices";
+export default {
+  name: "articlesFollowingList",
+  props: ["following"],
+  data: () => ({
+    cards: [],
+    windowWidth: null,
+    cloudName: `${process.env.VUE_APP_CLOUDNAME}`,
+    preset: `${process.env.VUE_APP_PRESET}`,
+    viewLook: "mdi-view-grid",
+    flex: 12,
+    width: 30,
+    height: 30,
+    offset: 0,
+    loggedIn: false,
+    snackBarMessage: "",
+    snackbar: false,
+    timeOut: 2500
+  }),
+  watch: {
+    windowWidth: function() {
+      this.resizePage();
+    }
+  },
+  async mounted() {
+    window.scrollTo(0, 0);
+    this.loggedIn = this.$store.state.isLoggedOn;
+    let credentials = {
+      following: this.following
+    };
+    let response = await DirectoryServices.youFollowingArticles(credentials);
+
+    if (response.data.success === false) {
+      this.viewLook = "mdi-format-list-bulleted";
+      this.tokenValid = false;
+      this.$store.dispatch("logout");
+    } else {
+      this.tokenValid = true;
+      this.cards = response.data;
+    }
+    this.windowWidth = window.innerWidth;
+    setTimeout(() => {
+      this.$nextTick(() => {
+        window.addEventListener("resize", this.onResize);
+      });
+      this.resizePage();
+      if (this.windowWidth < 768) {
+        this.width = 30;
+        this.height = 30;
+      } else {
+        this.width = 60;
+        this.height = 60;
+      }
+    }, 0);
+    this.viewLook = this.$store.state.viewLook;
+  },
+  methods: {
+    onResize() {
+      this.windowWidth = window.innerWidth;
+    },
+    resizePage() {
+      if (this.windowWidth < 768) {
+        this.flex = 12;
+        this.offset = 0;
+        this.width = 40;
+        this.height = 40;
+        this.cards.forEach(element => {
+          element.flex = 12;
+
+          element.title = element.title.toUpperCase();
+        });
+      } else {
+        this.width = 60;
+        this.height = 60;
+        this.cards.forEach(element => {
+          this.flex = 10;
+          this.offset = 1;
+          if (this.cards.length < 3) {
+            element.flex = 6;
+            element.title = element.title.toUpperCase();
+          } else {
+            element.flex = 4;
+            element.title = element.title.toUpperCase();
+          }
+        });
+      }
+    },
+    articleClick(event) {
+      if (this.tokenValid && this.$store.state.isLoggedOn) {
+        let targetID = event.currentTarget.id;
+        this.$router.push({ name: "articles", query: { id: targetID } });
+      } else {
+        this.snackBarMessage =
+          "You have to be registered and logged in to view articles";
+        this.snackbar = true;
+        setTimeout(() => {
+          this.$router.push({ name: "login" });
+        }, 2500);
+      }
+    }
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.onResize);
+  }
+};
+</script>
+
+<style scoped>
+.v-list-item {
+  background: white;
+}
+.v-list-item:nth-child(odd) {
+  background: rgba(245, 240, 240, 0.1);
+}
+/* } */
+@media only screen and (max-width: 768px) {
+  .v-list-item {
+    font-size: 80%;
+  }
+  .v-list-item {
+    background: white;
+  }
+  .v-list-item:nth-child(odd) {
+    background: rgba(245, 240, 240, 0.1);
+  }
+}
+</style>

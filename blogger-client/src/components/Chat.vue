@@ -6,31 +6,42 @@
       opacity="1"
       height="800"
       width="400"
-      persistent
       max-width="100%"
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn color="primary" dark v-bind="attrs" v-on="on" icon text>
-          <v-icon>mdi-chat</v-icon> Chat
+        <v-btn
+          :color="iconColor"
+          dark
+          v-bind="attrs"
+          v-on="on"
+          icon
+          text
+          @click="revertColor"
+        >
+          {{ chatIconText }}
+          <v-icon :color="iconColor" dark style="margin-right: 15px;">{{
+            chatIcon
+          }}</v-icon>
         </v-btn>
       </template>
 
       <v-card height="550" width="500">
         <v-card-title>
           <v-spacer></v-spacer>
-          <span class="headline"><h3>Chat Box</h3></span>
+          <span class="headline"
+            ><h3 style="color: #111d5e;">Chat Box</h3></span
+          >
           <v-spacer></v-spacer>
           <v-btn
-            color="primary"
+            color="#111d5e"
             dark
             icon
             text
-            v-if="windowWidth < 768"
             @click="dialog = false"
             style="margin-right: 7px;"
           >
-            <small>Chat-</small>
-            <v-icon small>mdi-chat</v-icon>
+            <small>Hide</small>
+            <v-icon small>mdi-chat-sleep</v-icon>
           </v-btn>
         </v-card-title>
         <hr />
@@ -88,16 +99,17 @@
             <v-col cols="12" xs="12" sm="12" md="12">
               <v-switch
                 v-model="playSound"
+                color="#111d5e"
                 class="ma-2"
                 :label="playSound ? 'Sound On' : 'Sound Off'"
               ></v-switch>
             </v-col>
             <div class="mobileButtons">
-              <v-spacer v-if="windowWidth > 768"></v-spacer>
+              <!-- <v-spacer v-if="windowWidth > 768"></v-spacer> -->
               <v-spacer></v-spacer>
               <v-btn text icon @click="exitChat">
-                Exit Chat
-                <v-icon color="orange">mdi-chat-remove</v-icon>
+                Exit
+                <v-icon color="red">mdi-chat-remove</v-icon>
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn type="submit" text class="btn btn-success" icon>
@@ -125,6 +137,11 @@ export default {
     return {
       snackBarMessage: "You have received a new 'Chat' message",
       windowWidth: window.innerWidth,
+      chatIcon: "mdi-chat",
+      chatIconText: "Chat",
+      // iconColor: "black",
+      iconColor: "white",
+      // iconColor: "#111d5e",
       snackbar: false,
       timeOut: 3000,
       dialog: false,
@@ -135,21 +152,31 @@ export default {
       messageTo: "",
       items: ["Hazel Cox", "Joe Soap", "Wayne Bruton"],
       messages: [],
-      socket: io("localhost:3000")
+      socket: io("localhost:3000"),
+      messageReceived: 0
     };
   },
   watch: {
     dialog: function() {
       if (this.dialog) {
-        console.log("WE ARE ON");
+        // console.log("WE ARE ON");
+        this.chatIcon = "mdi-chat-sleep";
+        this.chatIconText = "Hide";
         this.newUser();
-        // this.$nextTick(() => {
-        //   this.$refs.chatBox.scrollTop(1000000);
-        // });
       } else {
-        console.log("WE ARE OFF@@@");
+        // console.log("WE ARE OFF@@@");
+        this.chatIcon = "mdi-chat";
+        this.chatIconText = "Chat";
         // this.playSound = true;
       }
+      if (this.windowWidth < 768) {
+        this.iconColor = "#111d5e";
+      } else {
+        this.iconColor = "white";
+      }
+      // else {
+      //   this.iconColor = "white";
+      // }
     }
   },
   methods: {
@@ -193,7 +220,14 @@ export default {
     }
   },
   mounted() {
-    console.log(this.windowWidth);
+    if (this.windowWidth < 768) {
+      this.iconColor = "#111d5e";
+    }
+    // else {
+    //   // this.iconColor = "white"
+    //   this.iconColor = "white";
+    // }
+    // console.log(this.windowWidth);
     this.user = this.$store.state.userName;
     this.newUser();
     this.socket.on("MESSAGE", data => {
@@ -213,7 +247,7 @@ export default {
                 })
                 .sort();
 
-              console.log("USERS", this.items);
+              // console.log("USERS", this.items);
             });
           }, 0);
         });
@@ -229,7 +263,9 @@ export default {
       this.messages = [...this.messages, data];
       if (!this.dialog) {
         (this.snackBarMessage = "You have received a new 'Chat' message"),
-          (this.snackbar = true);
+          this.messageReceived++;
+        this.iconColor = "#FF0000";
+        this.snackbar = true;
       }
       setTimeout(() => {
         this.$nextTick(() => {
@@ -248,7 +284,7 @@ export default {
           return el !== this.user;
         })
         .sort();
-      console.log("USERS", this.items);
+      // console.log("USERS", this.items);
     });
     this.socket.on("display", data => {
       if (data.typing == true) {
@@ -271,12 +307,12 @@ export default {
 ul {
   list-style: none;
   text-align: left;
-  /* background-color: red; */
+  /* background-color: rgba(260, 270, 220, 1); */
 }
 .v-dialog {
   position: absolute;
-  top: 1;
-  right: 0;
+  /* top: 1;
+  right: 0; */
 }
 .scrollable {
   height: 100px;
@@ -288,10 +324,10 @@ ul {
   justify-content: space-between;
 }
 @media only screen and (max-width: 768px) {
-  .v-dialog {
+  /* .v-dialog {
     top: 20;
     right: 0;
-  }
+  } */
   /* .mobileButtons {
     flex-direction: column;
   } */

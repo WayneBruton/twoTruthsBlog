@@ -1,5 +1,10 @@
 <template>
   <div class="about">
+    <v-btn color="#111d5e" text icon @click="back">
+      <v-icon color="#111d5e" x-large>mdi-chevron-left</v-icon>
+      <strong>Back</strong>
+    </v-btn>
+
     <v-container>
       <v-col :cols="flex" :offset="offset">
         <v-row dense>
@@ -69,7 +74,7 @@
                       @click="addClaps"
                       @mouseleave="addLikesDone"
                     >
-                      <v-icon color="indigo">mdi-thumb-up-outline</v-icon>
+                      <v-icon color="#111d5e">mdi-thumb-up-outline</v-icon>
                     </v-btn>
                     <v-btn
                       :disabled="thumbsDownDisabled"
@@ -77,7 +82,7 @@
                       @click="deductClaps"
                       @mouseleave="addLikesDone"
                     >
-                      <v-icon color="indigo">mdi-thumb-down-outline</v-icon>
+                      <v-icon color="#111d5e">mdi-thumb-down-outline</v-icon>
                     </v-btn>
                   </div>
                   <v-spacer></v-spacer>
@@ -103,9 +108,9 @@
             <br />
 
             <!-- #010a43 -->
-            <v-expansion-panels popout color="indigo">
-              <v-expansion-panel dark color="indigo">
-                <v-expansion-panel-header dark color="indigo" class="header"
+            <v-expansion-panels popout color="#111d5e">
+              <v-expansion-panel dark color="#111d5e">
+                <v-expansion-panel-header dark color="#111d5e" class="header"
                   ><h2 style="color: white;">
                     Comments
                   </h2></v-expansion-panel-header
@@ -379,6 +384,57 @@
           <br /><br />
         </v-row>
       </v-col>
+
+      <v-layout style="" v-if="recentArticles.length" class="holding">
+        <br /><br />
+        <v-col :cols="flex" :offset="offset">
+          <v-card
+            max-width="1000"
+            min-width="100%"
+            class="mx-auto"
+            elevation="1"
+          >
+            <!-- <v-toolbar color="rgba(171, 177, 184, 0.2)" elevation="0"> -->
+            <v-toolbar color="#111d5e" dark elevation="0">
+              <v-spacer></v-spacer>
+              <v-toolbar-title>Recent Articles by Same Author</v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+            <v-list multiple subheader>
+              <v-list-item
+                v-for="item in recentArticles"
+                :key="item.id"
+                :id="item.id"
+                @click="articleNavigate($event)"
+                style="display: flex;"
+              >
+                <v-list-item-content
+                  style="display: flex; flex-direction: column; width: 70%;"
+                >
+                  <v-list-item-title
+                    v-text="item.title"
+                    style="font-size: 100%; width: 60%;"
+                  ></v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ item.readTime }} read</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+                <v-list-item-action style="width: 10%;">
+                  <cld-image
+                    :cloudName="cloudName"
+                    :publicId="item.coverImgID"
+                    loading="lazy"
+                    :width="width"
+                    :height="height"
+                  >
+                    <cld-transformation crop="fill" quality="auto" angle="0" />
+                  </cld-image>
+                </v-list-item-action>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-col>
+      </v-layout>
     </v-container>
 
     <v-snackbar v-model="snackbar" :timeout="timeOut" bottom top>
@@ -416,12 +472,12 @@
           <v-col cols="12" xs="12" sm="12" md="12">
             <div style="display:flex;justify-content: space-evenly;">
               <v-spacer></v-spacer>
-              <v-btn text color="indigo" @click="cancelReply">Cancel</v-btn>
+              <v-btn text color="#111d5e" @click="cancelReply">Cancel</v-btn>
               <v-spacer></v-spacer>
               <v-btn
                 :id="currentArticle"
                 text
-                color="indigo"
+                color="#111d5e"
                 @click="postReply($event)"
                 >Add Reply</v-btn
               >
@@ -441,6 +497,8 @@ export default {
   data: () => ({
     tokenValid: true,
     currentArticle: null,
+    authorId: null,
+    recentArticles: [],
     replyComment: "",
     currentCommentID: null,
     dialog: false,
@@ -454,6 +512,8 @@ export default {
     publicID: "",
     flex: 0,
     offset: 0,
+    width: 30,
+    height: 30,
     claps: 0,
     nowClapps: 0,
     addComment: "",
@@ -471,6 +531,7 @@ export default {
     followingText: "follow",
     snackbar: false,
     snackBarMessage: "",
+
     timeOut: 3000
   }),
   components: {},
@@ -482,13 +543,26 @@ export default {
   },
   async mounted() {
     this.windowWidth = window.innerWidth;
+    // setTimeout(() => {
+    //   this.$nextTick(() => {
+    //     window.addEventListener("resize", this.onResize);
+    //   });
+    //   // this.resizePage();
+    // }, 0);
+    // this.resizePage();
     setTimeout(() => {
       this.$nextTick(() => {
         window.addEventListener("resize", this.onResize);
       });
       this.resizePage();
+      if (this.windowWidth < 768) {
+        this.width = 40;
+        this.height = 40;
+      } else {
+        this.width = 60;
+        this.height = 60;
+      }
     }, 0);
-    this.resizePage();
     let search = window.location.search;
     this.src = this.$router.path;
     let query = search.replace("?", "").split("=");
@@ -503,7 +577,18 @@ export default {
       this.$router.push({ name: "home" });
     } else {
       this.tokenValid = true;
+      // console.log(response.data[0][0])
       this.cards = response.data[0][0];
+      this.authorId = response.data[0][0].member;
+      let recentCredentials = {
+        articleId: this.currentArticle,
+        authorId: this.authorId
+      };
+      let recentArticlesResponse = await DirectoryService.recentArticles(
+        recentCredentials
+      );
+      // console.log(recentArticlesResponse.data);
+      this.recentArticles = recentArticlesResponse.data;
       this.cards.title = this.cards.title.toUpperCase();
       this.publicID = this.cards.avatar;
       this.votedMembers = [];
@@ -523,6 +608,9 @@ export default {
     }
   },
   methods: {
+    back() {
+      this.$router.back();
+    },
     onResize() {
       this.windowWidth = window.innerWidth;
     },
@@ -530,9 +618,43 @@ export default {
       if (this.windowWidth < 768) {
         this.flex = 12;
         this.offset = 0;
+        this.height = 40;
+        this.width = 40;
+        this.cards.forEach(element => {
+          element.flex = 12;
+          element.title = element.title.toUpperCase();
+        });
+        // this.recentArticles.forEach((element) => {
+        //   element.flex = 12;
+        //   element.title = element.title.toUpperCase();
+        // });
       } else {
-        this.flex = 10;
-        this.offset = 1;
+        this.cards.forEach(element => {
+          this.flex = 10;
+          this.offset = 1;
+          this.height = 60;
+          this.width = 60;
+          if (this.cards.length < 3) {
+            element.flex = 6;
+            element.title = element.title.toUpperCase();
+          } else {
+            element.flex = 4;
+            element.title = element.title.toUpperCase();
+          }
+        });
+        // this.recentArticles.forEach((element) => {
+        //   // this.flex = 10;
+        //   // this.offset = 1;
+        //   this.height = 60;
+        //   this.width = 60;
+        // if (this.cards.length < 3) {
+        //   element.flex = 6;
+        //   element.title = element.title.toUpperCase();
+        // } else {
+        //   element.flex = 4;
+        //   element.title = element.title.toUpperCase();
+        // }
+        // });
       }
     },
     async getComments() {
@@ -647,7 +769,7 @@ export default {
         this.bookmarkColor = "grey";
       } else {
         this.bookMarked = true;
-        this.bookmarkColor = "indigo";
+        this.bookmarkColor = "#111d5e";
       }
       if (!followingResponse.data[1].length) {
         this.following = false;
@@ -656,7 +778,7 @@ export default {
         this.followingText = "follow";
       } else {
         this.following = true;
-        this.followingColor = "indigo";
+        this.followingColor = "#111d5e";
         this.followingIcon = "mdi-motion-sensor-off";
         this.followingText = "following";
       }
@@ -699,8 +821,9 @@ export default {
           userID: this.$store.state.userId,
           claps: this.claps
         };
-        let response = await DirectoryService.addLikes(credentials);
-        console.log(response.data);
+        // let response = await DirectoryService.addLikes(credentials);
+        await DirectoryService.addLikes(credentials);
+        // console.log(response.data);
         this.nowClapps = this.claps;
       }
     },
@@ -708,7 +831,7 @@ export default {
       let toBookMark;
       if (!this.bookMarked) {
         this.bookMarked = true;
-        this.bookmarkColor = "indigo";
+        this.bookmarkColor = "#111d5e";
         toBookMark = true;
       } else {
         this.bookMarked = false;
@@ -726,7 +849,7 @@ export default {
       let toFollow;
       if (!this.following) {
         this.following = true;
-        this.followingColor = "indigo";
+        this.followingColor = "#111d5e";
         this.followingIcon = "mdi-motion-sensor-off";
         this.followingText = "following";
         toFollow = true;
@@ -743,6 +866,49 @@ export default {
         toFollow: toFollow
       };
       await DirectoryService.follow(follow);
+    },
+    async articleNavigate(event) {
+      if (this.$store.state.isLoggedOn) {
+        this.$router.push({ name: "articles", query: { id: targetID } });
+        let targetID = event.currentTarget.id;
+        let credentials = targetID;
+        this.currentArticle = targetID;
+        this.articleId = targetID;
+        let response = await DirectoryService.getArticle(credentials);
+        // console.log(response);
+        this.tokenValid = true;
+        // console.log(response.data[0][0])
+        this.cards = response.data[0][0];
+        this.authorId = response.data[0][0].member;
+        let recentCredentials = {
+          articleId: this.currentArticle,
+          authorId: this.authorId
+        };
+        let recentArticlesResponse = await DirectoryService.recentArticles(
+          recentCredentials
+        );
+        this.recentArticles = recentArticlesResponse.data;
+        this.cards.title = this.cards.title.toUpperCase();
+        this.publicID = this.cards.avatar;
+        this.votedMembers = [];
+        response.data[1].forEach(el => {
+          this.votedMembers.push(el.member);
+        });
+        let thisMember = this.votedMembers.filter(el => {
+          return el === this.$store.state.userId;
+        });
+        this.votedBefore = [];
+        if (thisMember.length) {
+          this.votedBefore = true;
+        } else {
+          this.votedBefore = false;
+        }
+        this.followingAndBookmarked();
+
+        this.$router.push({ name: "articles", query: { id: targetID } });
+        window.scrollTo(0, 0);
+        // this.$router.go(0);
+      }
     }
   },
   async beforeDestroy() {
@@ -901,6 +1067,9 @@ ul {
   padding: 10px 15px;
   margin: 10px 125px;
 }
+.holding {
+  display: flex;
+}
 @media only screen and (max-width: 768px) {
   .author {
     display: flex;
@@ -913,6 +1082,12 @@ ul {
     flex-direction: column;
     padding: 10px 15px;
     margin: 10px 125px;
+  }
+  .v-list-item {
+    font-size: 80%;
+  }
+  .v-list-item {
+    background: white;
   }
 }
 </style>

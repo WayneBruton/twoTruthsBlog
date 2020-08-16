@@ -1,7 +1,5 @@
 <template>
   <div class="about">
-    <br />
-    <br />
     <v-container fluid v-if="this.$store.state.isLoggedOn">
       <v-row dense justify-center>
         <v-col :cols="flex" :offset="offset">
@@ -51,7 +49,11 @@
         </v-col>
         <br />
         <v-col :cols="flex" :offset="offset">
-          <v-text-field label="Name" v-model="name"></v-text-field>
+          <v-text-field
+            label="Name"
+            v-model="name"
+            ref="nameInput"
+          ></v-text-field>
           <v-text-field
             disabled
             type="email"
@@ -70,6 +72,7 @@
               :key="item.id"
               :label="`${item.label}`"
               :value="item.id"
+              color="#111d5e"
             ></v-radio>
           </v-radio-group>
           <v-text-field
@@ -95,17 +98,23 @@
             label="Enter topics you are interested in."
             multiple
             chips
+            prepend-icon="mdi-tag-heart"
+            color="#111d5e"
             deletable-chips
             dense
-            item-color="indigo"
+            item-color="#111d5e"
           ></v-combobox>
         </v-col>
         <br /><br />
       </v-row>
 
       <v-col :cols="flex" :offset="offset">
-        <v-btn text color="indigo" @click="discardChanges">Discard</v-btn>
-        <v-btn text color="indigo" @click="updateUser">Save</v-btn>
+        <v-btn text color="#111d5e" @click="discardChanges"
+          ><v-icon color="#111d5e">mdi-pen-off</v-icon>Discard</v-btn
+        >
+        <v-btn text color="#111d5e" @click="updateUser"
+          ><v-icon color="#111d5e">mdi-content-save</v-icon>Save</v-btn
+        >
       </v-col>
       <br />
 
@@ -139,7 +148,7 @@
           height="80"
           show-arrows
           v-model="tab"
-          background-color="indigo"
+          background-color="#111d5e"
           centered
           dark
           icons-and-text
@@ -204,7 +213,7 @@
                   prepend-icon="mdi-magnify"
                 ></v-text-field>
                 <v-spacer></v-spacer>
-                <v-btn text icon color="indigo" @click="reverseOrder"
+                <v-btn text icon color="#111d5e" @click="reverseOrder"
                   ><v-icon>{{ reverseIcon }}</v-icon></v-btn
                 >
               </v-toolbar>
@@ -239,6 +248,7 @@
                       item.subTitle2
                     }}</v-list-item-subtitle>
                   </v-list-item-content>
+                  <!-- {{ tab }} -->
                   <v-list-item-action>
                     <div style="display: flex;">
                       <v-tooltip top>
@@ -247,7 +257,7 @@
                             icon
                             v-on="on"
                             :id="item.viewId"
-                            v-if="tab === 'tab-4' || tab === 'tab-3'"
+                            v-show="tab === 'tab-4' || tab === 'tab-3'"
                             @click="editBtn($event)"
                           >
                             <v-icon color="green"
@@ -260,7 +270,12 @@
                       <v-tooltip top>
                         <template v-slot:activator="{ on }">
                           <v-btn
-                            v-if="tab !== 'tab-5' && tab !== 'tab-6'"
+                            v-show="
+                              tab === 'tab-1' ||
+                                tab === 'tab-2' ||
+                                tab === 'tab-3' ||
+                                tab === 'tab-4'
+                            "
                             v-on="on"
                             icon
                             :id="item.mainId"
@@ -279,10 +294,10 @@
                             v-on="on"
                             icon
                             :id="item.viewId"
-                            v-if="tab === 'tab-3' || tab === 'tab-1'"
+                            v-show="tab === 'tab-3' || tab === 'tab-1'"
                             @click="viewBtn($event)"
                           >
-                            <v-icon color="indigo"
+                            <v-icon color="#111d5e"
                               >mdi-book-open-page-variant</v-icon
                             >
                           </v-btn>
@@ -295,10 +310,10 @@
                             v-on="on"
                             icon
                             :id="item.viewId"
-                            v-if="tab === 'tab-5' || tab === 'tab-2'"
+                            v-show="tab === 'tab-5' || tab === 'tab-2'"
                             @click="viewProfileBtn($event)"
                           >
-                            <v-icon color="indigo">mdi-account-box</v-icon>
+                            <v-icon color="#111d5e">mdi-account-box</v-icon>
                           </v-btn>
                         </template>
                         <span>View</span>
@@ -340,12 +355,12 @@
           </v-card-text>
           <v-col cols="12" xs="12" sm="10" md="10" offset-md="1" offset-sm="1">
             <div style="display:flex;justify-content: space-evenly;">
-              <v-btn text color="indigo" @click="dialog = false">Cancel</v-btn>
+              <v-btn text color="#111d5e" @click="dialog = false">Cancel</v-btn>
               <v-spacer></v-spacer>
               <v-btn
                 :id="articleId"
                 text
-                color="indigo"
+                color="#111d5e"
                 @click="deleteArticle($event)"
                 >Delete</v-btn
               >
@@ -385,6 +400,7 @@ export default {
       oldsrc: "",
       orginalsrc: "",
       name: null,
+      nameOriginal: null,
       email: null,
       website: null,
       aboutMember: null,
@@ -426,13 +442,6 @@ export default {
       });
       this.resizePage();
     }, 0);
-    // if (this.windowWidth < 768) {
-    //   this.flex = 12;
-    //   this.offset = 0;
-    // } else {
-    //   this.flex = 6;
-    //   this.offset = 3;
-    // }
     if (this.$store.state.avatar !== null) {
       this.src = this.$store.state.avatar;
     }
@@ -476,7 +485,8 @@ export default {
         this.cards = [];
         this.updatePopularTagsArray();
       }
-      console.log("cards", this.cards);
+      this.search = "";
+      // console.log("cards", this.cards);
     },
     windowWidth: function() {
       this.resizePage();
@@ -505,8 +515,9 @@ export default {
         memberId: this.$store.state.userId
       };
       let response = await DirectoryService.myStuff(credentials);
-      console.log(response.data);
+      // console.log(response.data);
       this.name = response.data[6][0].name;
+      this.nameOriginal = response.data[6][0].name;
       this.email = response.data[6][0].email;
       this.website = response.data[6][0].website;
       this.aboutMember = response.data[6][0].aboutMember;
@@ -538,10 +549,10 @@ export default {
       this.followers = response.data[4];
       this.drafts = drafts;
       this.published = published;
-      console.log(this.bookmarks);
-      console.log(this.following);
-      console.log(this.drafts);
-      console.log(this.published);
+      // console.log(this.bookmarks);
+      // console.log(this.following);
+      // console.log(this.drafts);
+      // console.log(this.published);
       this.cards = [];
       if (this.tab === null || this.tab === "tab-1") {
         this.updateBookmarksArray();
@@ -565,7 +576,7 @@ export default {
         id: this.$store.state.userId
       };
       let response = await DirectoryService.getHistoryLikes(credentials);
-      console.log(response.data);
+      // console.log(response.data);
       if (response.data.currentMonth) {
         this.currentMonthLikes = response.data.currentMonth;
       } else {
@@ -598,7 +609,7 @@ export default {
       });
       this.popularTags.length = 0;
       this.popularTags = nonZeroTags;
-      console.log(this.popularTags);
+      // console.log(this.popularTags);
       // console.log(nonZeroTags);
     },
     //UPDATE POPULAR TAGS
@@ -691,7 +702,7 @@ export default {
     },
     //UPLOAD NEW COVER IMAGE
     async uploadFiles() {
-      console.log(this.file.size);
+      // console.log(this.file.size);
       if (this.file.size <= 1000000) {
         this.progressBarActive = true;
         try {
@@ -756,33 +767,50 @@ export default {
 
       let aboutMember = this.aboutMember.replace(searchRegExpP, replaceWithP);
       // let query = search.replace("?", "").split("=");
-      let credentials = {
-        id: this.$store.state.userId,
-        name: this.name,
-        email: this.email,
-        website: this.website,
-        avatar: this.src,
-        tags: JSON.stringify(this.articleTags),
-        showEmail: this.showEmail,
-        aboutMember: aboutMember
-      };
-      let response = await DirectoryService.editMember(credentials);
-      if (response.data.success === true) {
-        let member = {
-          name: this.$store.state.userName,
-          email: this.$store.state.email,
+      let checkname = [];
+      if (this.name !== this.nameOriginal) {
+        let nameCheck = await DirectoryService.checkName({ name: this.name });
+        // console.log("Name Check", nameCheck.data);
+        checkname = nameCheck.data;
+      }
+      if (checkname.length) {
+        this.snackBarMessage = "Your Name must be unique";
+        this.snackbar = true;
+        setTimeout(() => {
+          this.$nextTick(() => {
+            this.$refs.nameInput.focus();
+          });
+        }, 0);
+      } else {
+        let credentials = {
           id: this.$store.state.userId,
-          avatar: this.src,
+          name: this.name,
+          email: this.email,
           website: this.website,
+          avatar: this.src,
+          tags: JSON.stringify(this.articleTags),
           showEmail: this.showEmail,
           aboutMember: aboutMember
         };
-        this.$store.dispatch("setUser", member);
-        this.snackBarMessage = "Details saved";
-        this.snackbar = true;
-      } else {
-        this.snackBarMessage = "Something went wrong. Please try again later";
-        this.snackbar = true;
+
+        let response = await DirectoryService.editMember(credentials);
+        if (response.data.success === true) {
+          let member = {
+            name: this.$store.state.userName,
+            email: this.$store.state.email,
+            id: this.$store.state.userId,
+            avatar: this.src,
+            website: this.website,
+            showEmail: this.showEmail,
+            aboutMember: aboutMember
+          };
+          this.$store.dispatch("setUser", member);
+          this.snackBarMessage = "Details saved";
+          this.snackbar = true;
+        } else {
+          this.snackBarMessage = "Something went wrong. Please try again later";
+          this.snackbar = true;
+        }
       }
     },
     async deleteBtn(event) {
@@ -837,7 +865,7 @@ export default {
           imagesArray.push(el.url_id);
         });
       }
-      console.log(imagesArray);
+      // console.log(imagesArray);
       if (imagesToDelete[0].coverImgID !== "sample") {
         imagesArray.push(imagesToDelete[0].coverImgID);
       }
@@ -856,7 +884,7 @@ export default {
     //STILL TO DO
     editBtn(event) {
       // let targetID = event.currentTarget.id;
-      console.log(targetID);
+      // console.log(targetID);
       let targetID = event.currentTarget.id;
       this.$router.push({ name: "editdraft", query: { id: targetID } });
     },
@@ -868,7 +896,7 @@ export default {
     //VIEW PUBLISHED ARTICLE
     viewProfileBtn(event) {
       let targetID = event.currentTarget.id;
-      console.log(targetID);
+      // console.log(targetID);
       this.$router.push({ name: "profileview", query: { id: targetID } });
     }
   },

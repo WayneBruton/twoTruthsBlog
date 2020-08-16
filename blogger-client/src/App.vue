@@ -1,7 +1,7 @@
 <template>
   <v-app>
-    <v-container fluid>
-      <!-- <v-system-bar
+    <!-- <v-container fluid>
+      <v-system-bar
         sticky
           color="lime"
           :height="height"
@@ -15,12 +15,26 @@
           <v-icon>mdi-signal-cellular-outline</v-icon>
           <v-icon>mdi-battery</v-icon>
           <span>12:30</span>
-        </v-system-bar> -->
-    </v-container>
-    <Header />
-    <chat v-if="this.$store.state.isLoggedOn" />
+        </v-system-bar>
+    </v-container> -->
 
     <v-main>
+      <Header />
+      <v-row justify="center">
+        <!-- <v-layout text-center wrap> -->
+        <!-- v-show="this.$route.name === 'home'" -->
+        <v-img
+          alt="Vuetify Logo"
+          class="shrink mr-2"
+          contain
+          transition="scale-transition"
+          width="185"
+          :src="src"
+        />
+        <!-- </v-layout> -->
+      </v-row>
+      <chat v-if="this.$store.state.isLoggedOn && this.windowWidth < 768" />
+      <br v-if="this.$store.state.isLoggedOn && this.windowWidth < 768" />
       <v-layout text-center wrap>
         <v-flex xs12 md12 offsetmd9>
           <!-- <transition name="slide-fade" mode="out-in"> -->
@@ -28,28 +42,47 @@
           <!-- </transition> -->
         </v-flex>
       </v-layout>
+      <Cookie v-if="!this.$store.state.cookiesAccepted" />
     </v-main>
-    <!-- <chat /> -->
-
-    <!-- </v-content> -->
   </v-app>
 </template>
 
 <script>
 import Header from "./components/Header";
-import Chat from "./components/Chat.vue";
+// import Chat from "./components/Chat.vue";
+// import CookieLaw from "vue-cookie-law";
 
 export default {
   name: "App",
 
   components: {
     Header,
-    Chat
+    Chat: () => import("./components/Chat.vue"),
+    Cookie: () => import("./components/Cookie")
+    // CookieLaw,
   },
 
   data: () => ({
+    windowWidth: window.innerWidth,
+    src: require("../src/assets/Logo.png")
     //
-  })
+  }),
+  beforeDestroy() {
+    window.removeEventListener("resize", this.onResize);
+  },
+  methods: {
+    onResize() {
+      this.windowWidth = window.innerWidth;
+    }
+  },
+  mounted() {
+    setTimeout(() => {
+      this.$nextTick(() => {
+        window.addEventListener("resize", this.onResize);
+      });
+      // this.resizePage();
+    }, 0);
+  }
 };
 </script>
 
