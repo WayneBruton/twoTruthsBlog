@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import DirectoryServices from "../services/DirectoryServices";
+import DirectoryServices from "@/services/DirectoryServices";
 export default {
   name: "articlesFollowingList",
   props: ["following"],
@@ -137,12 +137,13 @@ export default {
         let targetID = event.currentTarget.id;
         this.$router.push({ name: "articles", query: { id: targetID } });
       } else {
-        this.snackBarMessage =
-          "You have to be registered and logged in to view articles";
-        this.snackbar = true;
-        setTimeout(() => {
-          this.$router.push({ name: "login" });
-        }, 2500);
+        // this.snackBarMessage =
+        //   "You have to be registered and logged in to view articles";
+        // this.snackbar = true;
+        // setTimeout(() => {
+        //   this.$router.push({ name: "login" });
+        // }, 2500);
+        this.$emit("notLoggedIn");
       }
     }
   },

@@ -52,27 +52,35 @@ const MyPlugin = {
           }
         },
         async uploadCoverFiles() {
-          this.progressBarActive = true;
-          try {
-            this.sizeOfFile();
-            var formData = new FormData();
-            formData.append("file", this.file);
-            let response = await DirectoryService.uploadCoverImage(formData);
-            let url = response.data.url;
-            let url_id = response.data.url_id;
-            let imageInfo = {
-              url,
-              url_id
-            };
-            this.oldsrc = this.src;
-            this.deleteCoverImage();
-            this.src = imageInfo;
-            this.progressBarActive = false;
-          } catch (e) {
-            this.snackBarMessage = "There was a problem. Try again later";
+          // this.progressBarActive = true;
+          if (this.file.size > parseInt(process.env.VUE_APP_FILESIZE)) {
+            this.file = [];
+            this.snackBarMessage = "File size cannot exceed 2Mb";
             this.snackbar = true;
-          } finally {
-            this.progressBarActive = false;
+            // return this.progressBarActive = false;
+            return (this.snackbar = true);
+          } else if (this.file.size < 2000000) {
+            this.progressBarActive = true;
+            try {
+              var formData = new FormData();
+              formData.append("file", this.file);
+              let response = await DirectoryService.uploadCoverImage(formData);
+              let url = response.data.url;
+              let url_id = response.data.url_id;
+              let imageInfo = {
+                url,
+                url_id
+              };
+              this.oldsrc = this.src;
+              this.deleteCoverImage();
+              this.src = imageInfo;
+              this.progressBarActive = false;
+            } catch (e) {
+              this.snackBarMessage = "There was a problem. Try again later";
+              this.snackbar = true;
+            } finally {
+              this.progressBarActive = false;
+            }
           }
         },
         addNewTags() {

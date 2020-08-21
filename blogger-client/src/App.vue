@@ -1,45 +1,46 @@
 <template>
   <v-app>
-    <!-- <v-container fluid>
-      <v-system-bar
-        sticky
-          color="lime"
-          :height="height"
-          :lights-out="lightsOut"
-          :window="window"
-        >
-          <v-icon>mdi-gmail</v-icon>
-          <span>10 unread emails</span>
-          <v-spacer></v-spacer>
-          <v-icon>mdi-wifi-strength-4</v-icon>
-          <v-icon>mdi-signal-cellular-outline</v-icon>
-          <v-icon>mdi-battery</v-icon>
-          <span>12:30</span>
-        </v-system-bar>
-    </v-container> -->
-
+    <v-expand-transition>
+      <v-alert
+        v-show="
+          this.$store.state.chatMessageNotification &&
+            !this.$store.state.paidMember
+        "
+        prominent
+        dark
+        color="pink"
+        icon="mdi-chat-alert"
+        border="bottom"
+        @click="closeChatAlert"
+      >
+        <div style="display: flex; justify-content: space-between;">
+          <div style="padding-top: 8px; font-weight: bold;">
+            <strong>YOU HAVE A CHAT MESSAGE:</strong>
+            {{ this.$store.state.chatMessage }}
+          </div>
+          <v-btn icon large @click="closeChatAlert"
+            ><v-icon>mdi-close-circle</v-icon></v-btn
+          >
+        </div>
+      </v-alert>
+    </v-expand-transition>
     <v-main>
       <Header />
       <v-row justify="center">
-        <!-- <v-layout text-center wrap> -->
-        <!-- v-show="this.$route.name === 'home'" -->
         <v-img
           alt="Vuetify Logo"
           class="shrink mr-2"
           contain
           transition="scale-transition"
-          width="185"
+          width="120"
           :src="src"
         />
-        <!-- </v-layout> -->
       </v-row>
       <chat v-if="this.$store.state.isLoggedOn && this.windowWidth < 768" />
       <br v-if="this.$store.state.isLoggedOn && this.windowWidth < 768" />
       <v-layout text-center wrap>
         <v-flex xs12 md12 offsetmd9>
-          <!-- <transition name="slide-fade" mode="out-in"> -->
           <router-view />
-          <!-- </transition> -->
         </v-flex>
       </v-layout>
       <Cookie v-if="!this.$store.state.cookiesAccepted" />
@@ -49,9 +50,6 @@
 
 <script>
 import Header from "./components/Header";
-// import Chat from "./components/Chat.vue";
-// import CookieLaw from "vue-cookie-law";
-
 export default {
   name: "App",
 
@@ -67,20 +65,26 @@ export default {
     src: require("../src/assets/Logo.png")
     //
   }),
+  watch: {},
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
+    // this.$store.dispatch("showIntro");
   },
   methods: {
+    closeChatAlert() {
+      this.$store.dispatch("chatMessageClose");
+    },
     onResize() {
       this.windowWidth = window.innerWidth;
     }
   },
   mounted() {
     setTimeout(() => {
+      this.$store.dispatch("showIntro");
+      this.windowWidth = window.innerWidth;
       this.$nextTick(() => {
         window.addEventListener("resize", this.onResize);
       });
-      // this.resizePage();
     }, 0);
   }
 };

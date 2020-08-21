@@ -35,9 +35,10 @@ app.use(
 const initialRoutes = require("./routes/initialRoutes"),
   memberRoutes = require("./routes/memberRoutes"),
   imageRoutes = require("./routes/imageRoutes"),
-  articleRoutes = require("./routes/articleRoutes");
+  articleRoutes = require("./routes/articleRoutes"),
+  contactRoutes = require("./routes/contactRoutes");
 
-app.use(initialRoutes, memberRoutes, imageRoutes, articleRoutes);
+app.use(initialRoutes, memberRoutes, imageRoutes, articleRoutes, contactRoutes);
 
 const server = app.listen(port, () => {
   console.log(`Server running on port: ${port}`);

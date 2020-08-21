@@ -9,15 +9,7 @@
       max-width="100%"
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn
-          :color="iconColor"
-          dark
-          v-bind="attrs"
-          v-on="on"
-          icon
-          text
-          @click="revertColor"
-        >
+        <v-btn :color="iconColor" dark v-bind="attrs" v-on="on" icon text>
           {{ chatIconText }}
           <v-icon :color="iconColor" dark style="margin-right: 15px;">{{
             chatIcon
@@ -136,6 +128,7 @@ export default {
   data() {
     return {
       snackBarMessage: "You have received a new 'Chat' message",
+      expand: true,
       windowWidth: window.innerWidth,
       chatIcon: "mdi-chat",
       chatIconText: "Chat",
@@ -163,6 +156,7 @@ export default {
         this.chatIcon = "mdi-chat-sleep";
         this.chatIconText = "Hide";
         this.newUser();
+        this.$store.dispatch("chatMessageClose");
       } else {
         // console.log("WE ARE OFF@@@");
         this.chatIcon = "mdi-chat";
@@ -223,11 +217,6 @@ export default {
     if (this.windowWidth < 768) {
       this.iconColor = "#111d5e";
     }
-    // else {
-    //   // this.iconColor = "white"
-    //   this.iconColor = "white";
-    // }
-    // console.log(this.windowWidth);
     this.user = this.$store.state.userName;
     this.newUser();
     this.socket.on("MESSAGE", data => {
@@ -262,10 +251,14 @@ export default {
       }
       this.messages = [...this.messages, data];
       if (!this.dialog) {
-        (this.snackBarMessage = "You have received a new 'Chat' message"),
-          this.messageReceived++;
-        this.iconColor = "#FF0000";
-        this.snackbar = true;
+        // (this.snackBarMessage = "You have received a new 'Chat' message"),
+        //   this.messageReceived++;
+        // this.iconColor = "#FF0000";
+        // this.snackbar = true;
+        let info = {
+          chatMessage: `"${data.message}" - from: ${data.user}`
+        };
+        this.$store.dispatch("chatMessageReceived", info);
       }
       setTimeout(() => {
         this.$nextTick(() => {

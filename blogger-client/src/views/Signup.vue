@@ -199,7 +199,14 @@ export default {
       window.localStorage.setItem("token", response.data.token);
       let member = response.data.member;
       this.$store.dispatch("setUser", member);
-      this.$router.push({ name: "home" });
+      if (this.$store.state.viewArticleIdBeforeLoggedIn !== null) {
+        this.$router.push({
+          name: "articles",
+          query: { id: this.$store.state.viewArticleIdBeforeLoggedIn }
+        });
+      } else {
+        this.$router.push({ name: "home" });
+      }
     },
     reset() {
       this.$refs.form.reset();

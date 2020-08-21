@@ -1,6 +1,6 @@
 <template>
   <div class="about" v-if="cards.length > 0">
-    <h2>Your Interests</h2>
+    <h2>Following</h2>
     <br />
     <v-card class="mx-auto" max-width="1000" elevation="0">
       <v-layout>
@@ -9,6 +9,7 @@
             v-for="card in cards"
             :key="card.id"
             :cols="card.flex"
+            :offset="card.offset"
             elevation="0"
           >
             <v-card :id="card.id" @click="articleClick($event)" elevation="3">
@@ -44,10 +45,11 @@
 </template>
 
 <script>
-import DirectoryServices from "../services/DirectoryServices";
+// import DirectoryServices from "../services/DirectoryServices";
+import DirectoryServices from "@/services/DirectoryServices";
 export default {
-  name: "articlesLatesGrid",
-  props: ["tags"],
+  name: "articlesFollowingGrid",
+  props: ["following"],
   data: () => ({
     cards: [],
     windowWidth: null,
@@ -61,26 +63,10 @@ export default {
     loggedIn: false,
     snackBarMessage: "",
     snackbar: false,
-    timeOut: 2500
+    timeOut: 1000
   }),
   async mounted() {
     // console.log("AWESOME!@!@",this.tags)
-    this.cards = [];
-    window.scrollTo(0, 0);
-    this.loggedIn = this.$store.state.isLoggedOn;
-    let credentials = {
-      tags: this.tags
-    };
-    let response = await DirectoryServices.yourLatestInterests(credentials);
-    // console.log(response.data);
-    if (response.data.success === false) {
-      this.viewLook = "mdi-format-list-bulleted";
-      this.tokenValid = false;
-      this.$store.dispatch("logout");
-    } else {
-      this.tokenValid = true;
-      this.cards = response.data;
-    }
     this.windowWidth = window.innerWidth;
     setTimeout(() => {
       this.$nextTick(() => {
@@ -95,6 +81,23 @@ export default {
         this.height = 60;
       }
     }, 0);
+    this.cards = [];
+    window.scrollTo(0, 0);
+    this.loggedIn = this.$store.state.isLoggedOn;
+    let credentials = {
+      following: this.following
+    };
+    let response = await DirectoryServices.youFollowingArticles(credentials);
+    // console.log(response.data);
+    if (response.data.success === false) {
+      this.viewLook = "mdi-format-list-bulleted";
+      this.tokenValid = false;
+      this.$store.dispatch("logout");
+    } else {
+      this.tokenValid = true;
+      this.cards = response.data;
+    }
+    this.onResize();
     this.viewLook = this.$store.state.viewLook;
   },
   methods: {
@@ -105,15 +108,21 @@ export default {
         this.offset = 0;
         this.cards.forEach(element => {
           element.flex = 12;
+          element.offset = 0;
         });
       } else {
         this.cards.forEach(element => {
           this.flex = 10;
           this.offset = 1;
-          if (this.cards.length < 3) {
+          if (this.cards.length == 1) {
             element.flex = 6;
+            element.offset = 3;
+          } else if (this.cards.length < 3) {
+            element.flex = 6;
+            element.offset = 0;
           } else {
             element.flex = 4;
+            element.offset = 0;
           }
         });
       }
@@ -125,15 +134,21 @@ export default {
         this.offset = 0;
         this.cards.forEach(element => {
           element.flex = 12;
+          element.offset = 0;
         });
       } else {
+        this.flex = 10;
+        this.offset = 1;
         this.cards.forEach(element => {
-          this.flex = 10;
-          this.offset = 1;
-          if (this.cards.length < 3) {
+          if (this.cards.length == 2) {
             element.flex = 6;
+            element.offset = 3;
+          } else if (this.cards.length < 3) {
+            element.flex = 6;
+            element.offset = 0;
           } else {
             element.flex = 4;
+            element.offset = 0;
           }
         });
       }
@@ -143,12 +158,13 @@ export default {
         let targetID = event.currentTarget.id;
         this.$router.push({ name: "articles", query: { id: targetID } });
       } else {
-        this.snackBarMessage =
-          "You have to be registered and logged in to view articles";
-        this.snackbar = true;
-        setTimeout(() => {
-          this.$router.push({ name: "login" });
-        }, 2500);
+        this.$emit("notLoggedIn");
+        // this.snackBarMessage =
+        //   "You have to be registered and logged in to view articles";
+        // this.snackbar = true;
+        // setTimeout(() => {
+        //   this.$router.push({ name: "login" });
+        // }, 1000);
       }
     }
   },

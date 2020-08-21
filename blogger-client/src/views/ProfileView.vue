@@ -52,18 +52,74 @@
         <v-col :cols="flex" :offset="offset">
           <!-- :type="value ? 'password' : 'text'" -->
           <label justify-left
-            >{{ followers }}
+            >Followers: {{ followers }}
             {{ followers === 1 ? "follower" : "followers" }}</label
           >
         </v-col>
         <v-col :cols="flex" :offset="offset">
           <label justify-left
-            >following: {{ following }}
+            >Following: {{ following }}
             {{ following === 1 ? "member" : "members" }}
+          </label>
+        </v-col>
+        <v-col :cols="flex" :offset="offset">
+          <label justify-left
+            >Articles: {{ authorArticles.length }}
+            {{ authorArticles.length === 1 ? "article" : "articles" }}
           </label>
         </v-col>
         <br /><br />
       </v-row>
+
+      <v-layout style="" v-if="authorArticles.length" class="holding">
+        <br /><br />
+        <v-col :cols="flex" :offset="offset">
+          <v-card
+            max-width="1000"
+            min-width="100%"
+            class="mx-auto"
+            elevation="1"
+          >
+            <v-toolbar color="#111d5e" dark elevation="0">
+              <v-spacer></v-spacer>
+              <v-toolbar-title>Articles by {{ name }}</v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+            <v-list multiple subheader>
+              <v-list-item
+                v-for="item in authorArticles"
+                :key="item.id"
+                :id="item.id"
+                @click="articleNavigate($event)"
+                style="display: flex;"
+              >
+                <v-list-item-content
+                  style="display: flex; flex-direction: column; width: 70%;"
+                >
+                  <v-list-item-title
+                    v-text="item.title"
+                    style="font-size: 100%; width: 60%;"
+                  ></v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ item.readTime }} read</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+                <v-list-item-action style="width: 10%;">
+                  <cld-image
+                    :cloudName="cloudName"
+                    :publicId="item.coverImgID"
+                    loading="lazy"
+                    :width="width"
+                    :height="height"
+                  >
+                    <cld-transformation crop="fill" quality="auto" angle="0" />
+                  </cld-image>
+                </v-list-item-action>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-col>
+      </v-layout>
     </v-container>
   </div>
 </template>
@@ -87,7 +143,8 @@ export default {
       aboutMember: "",
       followers: 999,
       following: 999,
-      windowWidth: null
+      windowWidth: null,
+      authorArticles: []
     };
   },
   async mounted() {
@@ -98,13 +155,26 @@ export default {
       });
       this.resizePage();
     }, 0);
-    // if (this.windowWidth < 768) {
-    //   this.flex = 12;
-    //   this.offset = 0;
-    // } else {
-    //   this.flex = 6;
-    //   this.offset = 3;
-    // }
+    if (this.windowWidth < 768) {
+      this.flex = 12;
+      this.offset = 0;
+    } else {
+      this.flex = 6;
+      this.offset = 3;
+    }
+    setTimeout(() => {
+      this.$nextTick(() => {
+        window.addEventListener("resize", this.onResize);
+      });
+      this.resizePage();
+      if (this.windowWidth < 768) {
+        this.width = 40;
+        this.height = 40;
+      } else {
+        this.width = 60;
+        this.height = 60;
+      }
+    }, 0);
     let search = window.location.search;
     let query = search.replace("?", "").split("=");
     // let credentials = query[query.length - 1];
@@ -120,6 +190,13 @@ export default {
     this.aboutMember = response.data[0][0].aboutMember;
     this.followers = response.data[1][0].followers;
     this.following = response.data[2][0].following;
+    let recentCredentials = {
+      authorId: query[query.length - 1]
+    };
+    let authorArticlesResponse = await DirectoryService.authorArticles(
+      recentCredentials
+    );
+    this.authorArticles = authorArticlesResponse.data;
   },
   computed: {},
   watch: {
@@ -128,6 +205,10 @@ export default {
     }
   },
   methods: {
+    articleNavigate(event) {
+      let targetID = event.currentTarget.id;
+      this.$router.push({ name: "articles", query: { id: targetID } });
+    },
     back() {
       this.$router.back();
     },
@@ -138,9 +219,13 @@ export default {
       if (this.windowWidth < 768) {
         this.flex = 12;
         this.offset = 0;
+        this.width = 40;
+        this.height = 40;
       } else {
         this.flex = 6;
         this.offset = 3;
+        this.width = 60;
+        this.height = 60;
       }
     }
   },
@@ -150,4 +235,8 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.holding {
+  display: flex;
+}
+</style>

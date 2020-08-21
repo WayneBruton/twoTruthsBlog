@@ -4,6 +4,7 @@ const pool = require("./connection");
 const readtime = require("estimated-read-time");
 const jwt = require("jsonwebtoken");
 var sanitizeHtml = require("sanitize-html");
+const moment = require("moment")
 
 let limit = 9
 
@@ -28,6 +29,7 @@ let checktoken = (req, res, next) => {
     });
   }
 };
+
 
 //GET FOLLOWERS
 router.put("/youFollowing", checktoken, (req, res) => {
@@ -69,12 +71,14 @@ router.put("/yourInterests", checktoken, (req, res) => {
 router.put("/yourLatestInterests", checktoken, (req, res) => {
   // console.log(req.body.tags);
   // router.get("/startApp", (req, res) => {
+    let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+    // console.log(now)
   let tags = req.body.tags;
   // let tags = [ 'Artificial Intelligence', 'Vue' ]
   let articles = [];
   let mysql = ``;
   tags.forEach((el) => {
-    let a = `select * from articles where tags like '%${el}%' and isDraft = false order by createdAt limit ${limit};`;
+    let a = `select * from articles where tags like '%${el}%' and isDraft = false and publish_date < '${now}' order by createdAt limit ${limit};`;
     mysql = mysql + a;
   });
   pool.getConnection(function (err, connection) {
@@ -85,14 +89,6 @@ router.put("/yourLatestInterests", checktoken, (req, res) => {
 
     connection.query(mysql, function (error, result) {
       if (error) throw error;
-      // console.log("%%%%%",result)
-      // console.log("%%%%%",result.length)
-      // if(result[0].constructor === Array) {
-      //   console.log("THERE IS AN ARRAY INSIDE")
-      // } else {
-      //   console.log("NO ARRAYS")
-
-      // }
       if (result.length > 0) {
       if(result[0].constructor === Array) {
       result.forEach((el) => {
@@ -162,8 +158,63 @@ router.put("/yourLatestInterests", checktoken, (req, res) => {
 //GET LATEST ARTICLES
 router.get("/startApp", (req, res) => {
   // router.get("/startApp", (req, res) => {
+    let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+    // console.log(now)
   let articles = [];
-  let mysql = `select * from articles where isDraft = false order by createdAt limit ${limit}`;
+  let mysql = `select * from articles where isDraft = false and publish_date < '${now}'order by createdAt limit ${limit}`;
+  pool.getConnection(function (err, connection) {
+    if (err) {
+      connection.release();
+      resizeBy.send("Error with connection");
+    }
+    //I AM HERE
+    connection.query(mysql, function (error, result) {
+      if (error) throw error;
+      result.forEach((el) => {
+        let article = {
+          title: el.title,
+          credit: el.credit,
+          author: el.member_name,
+          src: el.coverImgURL,
+          publicId: el.coverImgID,
+          text: sanitizeHtml(el.content, {
+            allowedTags: [],
+          }),
+          flex: 6,
+          id: el.id,
+        };
+        articles.unshift(article);
+      });
+      articles.forEach((el, index) => {
+        el.word_count = readtime.text(el.text).word_count;
+        el.readtime = Math.round(readtime.text(el.text).seconds / 60);
+        el.text = el.text.substring(0, 250) + "...";
+        if (el.text.length < 233) {
+          let variable = 233 - el.text.length;
+          let testArr = el.text.split();
+          let spacer = " ";
+          for (i = 0; i <= variable; i++) {
+            testArr.push(spacer);
+          }
+          el.text = testArr.join();
+        }
+      });
+      res.json(articles);
+    });
+    connection.release();
+  });
+});
+
+//GET popular ARTICLES
+router.get("/popularArticles", (req, res) => {
+  // router.get("/startApp", (req, res) => {
+    // let start = moment(new Date()).startOf('month').format('YYYY-MM-DD')
+    let start = moment(new Date()).subtract(14, 'days').format('YYYY-MM-DD')
+    // console.log("START", start)
+    let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+    // console.log(now)
+  let articles = [];
+  let mysql = `select * from articles where isDraft = false and createdAt > '${start}' and publish_date < '${now}' order by claps desc, createdAt limit ${limit}`;
   pool.getConnection(function (err, connection) {
     if (err) {
       connection.release();
@@ -211,10 +262,12 @@ router.get("/startApp", (req, res) => {
 //GET LATEST ARTICLES YOU ARE FOLLOWING
 router.put("/youFollowingArticles", checktoken, (req, res) => {
   // router.get("/startApp", (req, res) => {
+    let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+    // console.log(now)
     let following = req.body.following
     // console.log(following)
   let articles = [];
-  let mysql = `select * from articles where member IN (?) and isDraft = false order by createdAt limit ${limit}`;
+  let mysql = `select * from articles where member IN (?) and isDraft = false and publish_date < '${now}' order by createdAt limit ${limit}`;
   pool.getConnection(function (err, connection) {
     if (err) {
       connection.release();

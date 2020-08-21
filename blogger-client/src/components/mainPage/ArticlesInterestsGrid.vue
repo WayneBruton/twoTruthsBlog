@@ -1,6 +1,6 @@
 <template>
-  <div class="about">
-    <h2>Latest Articles</h2>
+  <div class="about" v-if="cards.length > 0">
+    <h2>Your Interests</h2>
     <br />
     <v-card class="mx-auto" max-width="1000" elevation="0">
       <v-layout>
@@ -44,9 +44,10 @@
 </template>
 
 <script>
-import DirectoryServices from "../services/DirectoryServices";
+import DirectoryServices from "@/services/DirectoryServices";
 export default {
   name: "articlesLatesGrid",
+  props: ["tags"],
   data: () => ({
     cards: [],
     windowWidth: null,
@@ -63,10 +64,14 @@ export default {
     timeOut: 2500
   }),
   async mounted() {
+    // console.log("AWESOME!@!@",this.tags)
     this.cards = [];
     window.scrollTo(0, 0);
     this.loggedIn = this.$store.state.isLoggedOn;
-    let response = await DirectoryServices.startApp();
+    let credentials = {
+      tags: this.tags
+    };
+    let response = await DirectoryServices.yourLatestInterests(credentials);
     // console.log(response.data);
     if (response.data.success === false) {
       this.viewLook = "mdi-format-list-bulleted";
@@ -138,12 +143,13 @@ export default {
         let targetID = event.currentTarget.id;
         this.$router.push({ name: "articles", query: { id: targetID } });
       } else {
-        this.snackBarMessage =
-          "You have to be registered and logged in to view articles";
-        this.snackbar = true;
-        setTimeout(() => {
-          this.$router.push({ name: "login" });
-        }, 2500);
+        // this.snackBarMessage =
+        //   "You have to be registered and logged in to view articles";
+        // this.snackbar = true;
+        // setTimeout(() => {
+        //   this.$router.push({ name: "login" });
+        // }, 2500);
+        this.$emit("notLoggedIn");
       }
     }
   },

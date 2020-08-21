@@ -15,8 +15,14 @@ export default new Vuex.Store({
     website: null,
     showEmail: null,
     aboutMember: null,
+    paidMember: null,
+    memberExpires: null,
     viewLook: "mdi-view-grid",
-    cookiesAccepted: false
+    cookiesAccepted: false,
+    chatMessageNotification: false,
+    chatMessage: "",
+    showIntro: true,
+    viewArticleIdBeforeLoggedIn: null
   },
   mutations: {
     setUser(state, user) {
@@ -28,6 +34,8 @@ export default new Vuex.Store({
       state.website = user.website;
       state.showEmail = user.showEmail;
       state.aboutMember = user.aboutMember;
+      state.paidMember = user.paidMember;
+      state.memberExpires = user.memberExpires;
     },
     logout(state) {
       state.isLoggedOn = false;
@@ -36,12 +44,36 @@ export default new Vuex.Store({
       state.userName = null;
       state.avatar = null;
       state.website = null;
+      state.showEmail = null;
+      state.aboutMember = null;
+      state.paidMember = null;
+      state.memberExpires = null;
     },
     changeView(state, data) {
       state.viewLook = data.viewLook;
     },
+    chatMessageReceived(state, data) {
+      state.chatMessage = data.chatMessage;
+      state.chatMessageNotification = true;
+    },
+    viewArticleIdBeforeLoggedIn(state, data) {
+      state.viewArticleIdBeforeLoggedIn = data;
+    },
+    clearArticleIdBeforeLoggedIn(state) {
+      state.viewArticleIdBeforeLoggedIn = null;
+    },
+    chatMessageClose(state) {
+      state.chatMessage = "";
+      state.chatMessageNotification = false;
+    },
     acceptCookies(state) {
       state.cookiesAccepted = true;
+    },
+    showIntro(state) {
+      state.showIntro = true;
+    },
+    hideIntro(state) {
+      state.showIntro = false;
     }
   },
   actions: {
@@ -54,8 +86,26 @@ export default new Vuex.Store({
     changeView({ commit }, data) {
       commit("changeView", data);
     },
+    chatMessageReceived({ commit }, data) {
+      commit("chatMessageReceived", data);
+    },
+    viewArticleIdBeforeLoggedIn({ commit }, data) {
+      commit("viewArticleIdBeforeLoggedIn", data);
+    },
+    clearArticleIdBeforeLoggedIn({ commit }) {
+      commit("clearArticleIdBeforeLoggedIn");
+    },
+    chatMessageClose({ commit }) {
+      commit("chatMessageClose");
+    },
     acceptCookies({ commit }) {
       commit("acceptCookies");
+    },
+    showIntro({ commit }) {
+      commit("showIntro");
+    },
+    hideIntro({ commit }) {
+      commit("hideIntro");
     }
   },
   modules: {}

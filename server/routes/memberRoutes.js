@@ -6,7 +6,9 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const totp = require("otplib").totp;
 const otp_secret = process.env.OTP_SECRET;
-const axios = require("axios")
+const axios = require("axios");
+const moment = require("moment")
+
 
 // CHECK TOKEN TO ENSURE LOGGED IN§
 let checktoken = (req, res, next) => {
@@ -136,7 +138,7 @@ router.put("/myStuff", (req, res) => {
   let mysql4 = `select * from tags order by tag`;
   let mysql5 = `select f.id as followingId, f.member as mySelf, f.member_following as following, f.createdAt as since, m.name, m.tags as tags, m.avatar from follows f, members m where f.member_following = '${req.body.memberId}' and f.member = m.id order by m.name`;
   let mysql6 = `select tags from members where id = ${req.body.memberId}`;
-  let mysql7 = `select * from members where id = ${req.body.memberId}`
+  let mysql7 = `select * from members where id = ${req.body.memberId}`;
 
   // let mysql5 = `select tags from members where order by tag`;
   let mysql = `${mysql1};${mysql2};${mysql3};${mysql4};${mysql5};${mysql6};${mysql7}`;
@@ -209,6 +211,8 @@ router.post("/createMember", (req, res) => {
           id: result[1][0].id,
           name: result[1][0].name,
           email: result[1][0].email,
+          paidMember: result[1][0].paidMember,
+          memberExpires: result[1][0].expires,
         };
         res.json({
           member: userJson,
@@ -237,8 +241,6 @@ router.put("/editMember", checktoken, (req, res) => {
   });
 });
 
-
-
 //RESET PASSWORD TOKEN
 router.put("/resetPasswordToken", (req, res) => {
   let mysql = `select * from members where email = '${req.body.email}'`;
@@ -256,7 +258,7 @@ router.put("/resetPasswordToken", (req, res) => {
             error: `No user registered under "${req.body.email}", try signup and register as a user.`,
           });
         } else {
-          console.log("RESULT", result[0].mobile)
+          console.log("RESULT", result[0].mobile);
           let tokenA = totp.generate(otp_secret);
           let smstoken = process.env.SMSToken;
           params = {
@@ -264,10 +266,10 @@ router.put("/resetPasswordToken", (req, res) => {
             body: `Here is your One Time Pin for TwoTruths
                     => ${tokenA} <=`,
           };
-        
+
           axios.defaults.headers.post["Authorization"] = `${smstoken}`; // for POST requests
-          // await 
-          let resultA =  axios
+          // await
+          let resultA = axios
             .post("https://api.bulksms.com/v1/messages", params)
             .then((result) => {
               smsResult = result.status;
@@ -281,7 +283,7 @@ router.put("/resetPasswordToken", (req, res) => {
             })
             .catch((error) => {
               // console.log("Status:", error.response.status);
-        
+
               let data = {
                 result: smsResult,
                 OTP: otp,
@@ -362,7 +364,9 @@ router.put("/login", (req, res) => {
             website: result[0].website,
             username: result[0].name,
             showEmail: result[0].showEmail,
-            aboutMember: result[0].aboutMember
+            aboutMember: result[0].aboutMember,
+            paidMember: result[0].paidMember,
+            memberExpires: result[0].expires,
           };
           bcrypt.compare(user_password, hash, function (err, response) {
             if (response) {

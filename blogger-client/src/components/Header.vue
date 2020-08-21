@@ -1,6 +1,7 @@
 <template>
   <div>
-    <v-app-bar app color="#111d5e" dark style="opacity:1">
+    <!-- <v-container fluid> </v-container> -->
+    <v-app-bar app color="#111d5e" dark style="opacity:1;">
       <!-- <v-app-bar app color="white" elevation="1" z-index="100" height="100"> -->
       <!-- <v-toolbar app color="white" elevation="1" z-index="100"> -->
       <div class="d-flex align-center">
@@ -10,7 +11,7 @@
           class="shrink mr-2"
           contain
           transition="scale-transition"
-          width="40"
+          width="35"
           :src="src"
         />
         <div class="returnHome" v-if="this.$route.name !== 'home'">
@@ -18,10 +19,10 @@
         </div>
 
         <div v-if="windowWidth > 768">
-          <h1 class="returnHome" @click="home">Idea Cafe</h1>
+          <h1 class="returnHome" @click="home">Vellum</h1>
         </div>
         <div v-else>
-          <h3 class="returnHome" @click="home">Idea Cafe</h3>
+          <h3 class="returnHome" @click="home">Vellum</h3>
         </div>
       </div>
       <v-spacer
@@ -47,7 +48,9 @@
             <v-icon>{{ item.icon }}</v-icon>
           </v-btn>
         </div>
+        <v-spacer></v-spacer>
 
+        <!-- <v-spacer></v-spacer> -->
         <v-menu bottom left offsetY min-width="12%" max-width="100%">
           <template v-slot:activator="{ on }">
             <v-btn dark icon v-on="on">
@@ -105,6 +108,7 @@ export default {
   data: () => ({
     windowWidth: null,
     src: require("../assets/Logo.png"),
+    // expand: true,
     items: [
       //MENU 1 = DROPDOWN
       {

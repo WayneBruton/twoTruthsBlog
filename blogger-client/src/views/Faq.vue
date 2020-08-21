@@ -33,7 +33,7 @@
               item.title
             }}</v-expansion-panel-header>
             <v-expansion-panel-content
-              style="background-color: white; color:black;"
+              style="background-color: white; color:black; padding-left: 15px;"
             >
               {{ item.explanation }}
             </v-expansion-panel-content>

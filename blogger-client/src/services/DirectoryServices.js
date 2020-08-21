@@ -4,6 +4,9 @@ export default {
   startApp() {
     return Api().get(`/startApp`);
   },
+  popularArticles() {
+    return Api().get(`/popularArticles`);
+  },
   yourInterests(credentials) {
     // console.log(credentials)
     return Api().put(`/yourInterests`, credentials);
@@ -17,6 +20,9 @@ export default {
   youFollowingArticles(credentials) {
     return Api().put(`/youFollowingArticles`, credentials);
   },
+  // popularArticles(credentials) {
+  //   return Api().put(`/popularArticles`, credentials);
+  // },
   checkEmail(credentials) {
     return Api().put(`/checkEmail`, credentials);
   },
@@ -68,6 +74,10 @@ export default {
   recentArticles(credentials) {
     // console.log(credentials)
     return Api().put(`/recentArticles`, credentials);
+  },
+  authorArticles(credentials) {
+    // console.log(credentials)
+    return Api().put(`/authorArticles`, credentials);
   },
   searchArticles(credentials) {
     // console.log(credentials)
@@ -123,5 +133,8 @@ export default {
   },
   getHistoryLikes(credentials) {
     return Api().put(`/getHistoryLikes`, credentials);
+  },
+  contactForm(credentials) {
+    return Api().put(`/contactForm`, credentials);
   }
 };

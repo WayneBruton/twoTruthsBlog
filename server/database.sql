@@ -48,6 +48,9 @@ create table articles (
     FOREIGN KEY (member) REFERENCES members(id) 
 );
 
+alter table articles add column publish_Date TIMESTAMP DEFAULT NOW();
+
+
 ALTER TABLE articles ADD FULLTEXT (title, content, member_name);
 
 alter table articles add articleImages text;

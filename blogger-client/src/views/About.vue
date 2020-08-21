@@ -4,13 +4,13 @@
       <v-layout wrap>
         <v-flex mb-5 xs12 md-8 offset-md1>
           <v-flex justify-center mb-2 mt-5 xs12>
-            <h1>About PerfectStaff</h1>
+            <h1>About Vellum</h1>
           </v-flex>
           <br />
           <h3>Introduction</h3>
           <br />
           <p>
-            PerfectStaff is a dynamic online method to ensure that your Standard
+            Vellum is a dynamic online method to ensure that your Standard
             Operating Procedures(SOP's) are read and acknowledged by your staff,
             contractors or any relevent individuals that deal with you and/or
             your organisation.
@@ -122,9 +122,9 @@
               <li>as necessary to enforce the Terms of Service;</li>
               <li>
                 as necessary to protect the rights, safety, or property of
-                PerfectStaff, its users, or others; this may include (for
-                example) exchanging information with other organizations for
-                fraud protection and/or risk reduction.
+                Vellum, its users, or others; this may include (for example)
+                exchanging information with other organizations for fraud
+                protection and/or risk reduction.
               </li>
             </ul>
           </ul>
@@ -132,20 +132,20 @@
           <h3>Cookies / European Union etc</h3>
           <br />
           <p>
-            Please see PerfectStaff's
+            Please see Vellum's
             <a @click="gotoPrivacy">privacy policy</a>.
           </p>
           <h3>Questions or comments?</h3>
           <br />
           <p>
-            If you have questions or comments about PerfectStaff's privacy
-            policy, send an
+            If you have questions or comments about Vellum's privacy policy,
+            send an
             <a href="mailto:support@perfect-staff.com">email</a> to
             support@perfect-staff.com, or contact us via any of the ways
-            described in the About Us page at URL of PerfectStaff's website.
+            described in the About Us page at URL of Vellum's website.
           </p>
           <br />
-          <p>Thank you for choosing <strong>PerfectStaff!</strong></p>
+          <p>Thank you for choosing <strong>Vellum!</strong></p>
         </v-flex>
       </v-layout>
     </v-container>
@@ -156,7 +156,7 @@
 export default {
   name: "about",
   metaInfo: {
-    title: `PerfectStaff - About`,
+    title: `Vellum - About`,
     meta: [
       {
         name: `description`,

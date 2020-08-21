@@ -34,12 +34,13 @@ const fileFilter = function (req, file, cb) {
     if (!allowedTypes.includes(file.mimetype)) {
       const error = new Error("Wrong file type");
       error.code = "LIMIT_FILE_TYPES";
+      console.log("%%%%%%",error)
       return cb(error, false);
     }
     cb(null, true);
   };
   
-  let MAX_SIZE = 1000000;
+  let MAX_SIZE = 2000000;
   const upload = multer({
     dest: "./public/uploads/",
     // dest: `${process.env.DRAFT_INITIAL_UPLOADS}`,

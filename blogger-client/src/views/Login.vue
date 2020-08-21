@@ -156,10 +156,20 @@ export default {
           avatar: response.data.user.avatar,
           website: response.data.user.website,
           showEmail: response.data.user.showEmail,
-          aboutMember: response.data.user.aboutMember
+          aboutMember: response.data.user.aboutMember,
+          paidMember: response.data.user.paidMember,
+          memberExpires: response.data.user.memberExpires
         };
         this.$store.dispatch("setUser", member);
-        this.$router.push({ name: "home" });
+        // console.log(this.$store.state.userId)
+        if (this.$store.state.viewArticleIdBeforeLoggedIn !== null) {
+          this.$router.push({
+            name: "articles",
+            query: { id: this.$store.state.viewArticleIdBeforeLoggedIn }
+          });
+        } else {
+          this.$router.push({ name: "home" });
+        }
       }
     },
     async resetPasswordToken() {

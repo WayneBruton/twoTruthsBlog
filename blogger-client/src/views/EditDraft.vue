@@ -72,6 +72,85 @@
             dense
             item-color="#111d5e"
           ></v-combobox>
+          <!-- {{ date }} {{ time }} -->
+          <v-btn
+            @click="resetTime"
+            color="#111d5e"
+            text
+            style="margin-bottom: 5px;"
+          >
+            <v-icon>mdi-undo-variant</v-icon>Original
+          </v-btn>
+          <v-btn
+            @click="setToNow"
+            color="#111d5e"
+            text
+            style="margin-bottom: 5px;"
+          >
+            <v-icon>mdi-calendar-today</v-icon>Now
+          </v-btn>
+        </v-col>
+        <v-col :cols="flex / 2" :offset="offset">
+          <br />
+          <v-menu
+            ref="datemenu"
+            v-model="menu"
+            :close-on-content-click="false"
+            :return-value.sync="date"
+            transition="scale-transition"
+            offset-y
+            min-width="290px"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                v-model="date"
+                label="Publish Date"
+                prepend-icon="mdi-calendar"
+                readonly
+                v-bind="attrs"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker v-model="date" no-title scrollable>
+              <v-spacer></v-spacer>
+              <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
+              <v-btn text color="primary" @click="$refs.datemenu.save(date)"
+                >OK</v-btn
+              >
+            </v-date-picker>
+          </v-menu>
+        </v-col>
+        <v-col :cols="flex / 2" :offset="0">
+          <br />
+          <v-menu
+            ref="menu"
+            v-model="menu2"
+            :close-on-content-click="false"
+            :nudge-right="40"
+            :return-value.sync="time"
+            transition="scale-transition"
+            offset-y
+            max-width="290px"
+            min-width="290px"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                v-model="time"
+                label="Publish Time"
+                prepend-icon="mdi-clock-time-two"
+                readonly
+                v-bind="attrs"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-time-picker
+              v-if="menu2"
+              v-model="time"
+              full-width
+              use-seconds
+              @click:minute="$refs.menu.save(time)"
+            ></v-time-picker>
+          </v-menu>
         </v-col>
       </v-row>
       <br />
@@ -126,6 +205,39 @@
       {{ snackBarMessage }}
       <v-btn color="pink" text @click="snackbar = false">Close</v-btn>
     </v-snackbar>
+
+    <v-row justify="center">
+      <v-dialog v-model="leaveDialog" persistent max-width="350">
+        <v-card>
+          <v-card-title class="headline">
+            <v-img
+              style="margin-top: 10px;"
+              alt="Vuetify Logo"
+              class="shrink mr-2"
+              contain
+              transition="scale-transition"
+              width="40"
+              :src="logosrc"
+            />
+            Unsaved Changes</v-card-title
+          >
+          <v-card-text
+            >You have unsaved changes. If you leave this page, these changes
+            will be lost</v-card-text
+          >
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red" text @click="closeDialog">Stay</v-btn>
+            <v-spacer></v-spacer>
+
+            <v-btn color="blue" text @click="discardChangesandMove"
+              >Leave</v-btn
+            >
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
   </div>
 </template>
 
@@ -141,11 +253,22 @@ export default {
   },
   data() {
     return {
+      leaveDialog: false,
+      to: null,
+      logosrc: require("../assets/Logo.png"),
       progressBarActive: false,
       cloudName: `${process.env.VUE_APP_CLOUDNAME}`,
       preset: `${process.env.VUE_APP_PRESET}`,
       publicID: this.$store.state.avatar,
       content: "<p>Enter images and article here</p>",
+
+      date: new Date().toISOString().substr(0, 10),
+      menu: false,
+      time: new Date().toLocaleTimeString(),
+      menu2: false,
+      originalDate: null,
+      originalTime: null,
+
       originalContent: "",
       articleId: null,
       articleImages: 0,
@@ -212,6 +335,16 @@ export default {
     // console.log("RESPONSE 2 ", response2.data);
     this.articleId = response2.data[0].id;
     // console.log(this.articleId);
+    this.originalDate = new Date(response2.data[0].publish_date)
+      .toISOString()
+      .substr(0, 10);
+    this.originalTime = new Date(
+      response2.data[0].publish_date
+    ).toLocaleTimeString();
+    this.date = this.originalDate;
+    this.time = this.originalTime;
+    // console.log(this.originalDate);
+    // console.log(this.originalTime);
     this.content = response2.data[0].content;
     this.originalContent = response2.data[0].content;
     this.title = response2.data[0].title;
@@ -247,6 +380,14 @@ export default {
     }
   },
   methods: {
+    resetTime() {
+      this.date = this.originalDate;
+      this.time = this.originalTime;
+    },
+    setToNow() {
+      this.date = new Date().toISOString().substr(0, 10);
+      this.time = new Date().toLocaleTimeString();
+    },
     onResize() {
       this.windowWidth = window.innerWidth;
     },
@@ -279,20 +420,27 @@ export default {
       this.$router.push({ name: "setup" });
     },
     async handleImageAdded(file, Editor, cursorLocation, resetUploader) {
-      this.progressBarActive = true;
-      var formData = new FormData();
-      formData.append("image", file);
-      let response = await DirectoryService.uploadImageInEditor(formData);
-      let url = response.data.url;
-      let url_id = response.data.url_id;
-      let imageInfo = {
-        url,
-        url_id
-      };
-      this.articleImagesArray.push(imageInfo);
-      Editor.insertEmbed(cursorLocation, "image", url);
-      resetUploader();
-      this.progressBarActive = false;
+      if (file.size > parseInt(process.env.VUE_APP_FILESIZE)) {
+        this.snackBarMessage = "Article image cannot exceed 2Mb";
+        this.snackbar = true;
+        // return this.progressBarActive = false;
+        return (this.snackbar = true);
+      } else {
+        this.progressBarActive = true;
+        var formData = new FormData();
+        formData.append("image", file);
+        let response = await DirectoryService.uploadImageInEditor(formData);
+        let url = response.data.url;
+        let url_id = response.data.url_id;
+        let imageInfo = {
+          url,
+          url_id
+        };
+        this.articleImagesArray.push(imageInfo);
+        Editor.insertEmbed(cursorLocation, "image", url);
+        resetUploader();
+        this.progressBarActive = false;
+      }
     },
     size() {
       this.sizeOfFile();
@@ -319,7 +467,8 @@ export default {
           tags: JSON.stringify(this.articleTags),
           isDraft: isDraft,
           newTags: JSON.stringify(this.newTags),
-          articleImages: JSON.stringify(this.articleImagesArray)
+          articleImages: JSON.stringify(this.articleImagesArray),
+          publish_date: `${this.date} ${this.time}`
         };
         let response = await DirectoryService.saveArticle(article);
         if (response.data.Awesome && !isDraft) {
@@ -335,6 +484,15 @@ export default {
         this.snackBarMessage = "You must have at least one tag";
         this.snackbar = true;
       }
+    },
+    closeDialog() {
+      this.leaveDialog = false;
+      this.to = null;
+    },
+    discardChangesandMove() {
+      this.leaveDialog = false;
+      this.discardThisPost();
+      this.$router.push(this.to);
     }
   },
   beforeDestroy() {
@@ -350,16 +508,15 @@ export default {
         JSON.stringify(this.originalarticleImagesArray) !=
           JSON.stringify(this.articleImagesArray))
     ) {
-      const answer = window.confirm(
-        "Do you really want to leave? you have unsaved changes!"
-      );
-      if (answer) {
-        // console.log("Leave", answer);
-        this.discardThisPost();
+      // if (
+      //   !this.articleSaved &&
+      //   (this.content !== "" || this.src.url_id !== "ancientruins")
+      // )
+      if (this.to) {
         next();
       } else {
-        // console.log("STAY", answer);
-        next(false);
+        this.to = to;
+        this.leaveDialog = true;
       }
     } else {
       next();

@@ -1,9 +1,9 @@
 <template>
-  <div class="about">
+  <div class="about" v-if="cards.length > 0">
     <v-col :cols="flex" :offset="offset">
       <v-card max-width="1000" min-width="100%" class="mx-auto" elevation="1">
         <v-toolbar color="#111d5e" dark elevation="0">
-          <v-toolbar-title>Latest Articles</v-toolbar-title>
+          <v-toolbar-title>Your Interests</v-toolbar-title>
         </v-toolbar>
         <v-list multiple subheader>
           <v-list-item
@@ -45,9 +45,10 @@
 </template>
 
 <script>
-import DirectoryServices from "../services/DirectoryServices";
+import DirectoryServices from "@/services/DirectoryServices";
 export default {
   name: "articlesLatesGrid",
+  props: ["tags"],
   data: () => ({
     cards: [],
     windowWidth: null,
@@ -71,7 +72,10 @@ export default {
   async mounted() {
     window.scrollTo(0, 0);
     this.loggedIn = this.$store.state.isLoggedOn;
-    let response = await DirectoryServices.startApp();
+    let credentials = {
+      tags: this.tags
+    };
+    let response = await DirectoryServices.yourLatestInterests(credentials);
 
     if (response.data.success === false) {
       this.viewLook = "mdi-format-list-bulleted";
@@ -109,6 +113,7 @@ export default {
         this.height = 40;
         this.cards.forEach(element => {
           element.flex = 12;
+
           element.title = element.title.toUpperCase();
         });
       } else {
@@ -132,12 +137,13 @@ export default {
         let targetID = event.currentTarget.id;
         this.$router.push({ name: "articles", query: { id: targetID } });
       } else {
-        this.snackBarMessage =
-          "You have to be registered and logged in to view articles";
-        this.snackbar = true;
-        setTimeout(() => {
-          this.$router.push({ name: "login" });
-        }, 2500);
+        // this.snackBarMessage =
+        //   "You have to be registered and logged in to view articles";
+        // this.snackbar = true;
+        // setTimeout(() => {
+        //   this.$router.push({ name: "login" });
+        // }, 2500);
+        this.$emit("notLoggedIn");
       }
     }
   },

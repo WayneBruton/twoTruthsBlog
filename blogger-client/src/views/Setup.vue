@@ -4,6 +4,8 @@
       <v-row dense justify-center>
         <v-col :cols="flex" :offset="offset">
           <h1>Profile</h1>
+          <!-- <h2>{{ this.paidMember }}</h2>
+          <h2>Expires{{ this.memberExpires }}</h2> -->
         </v-col>
         <v-col :cols="flex" :offset="offset">
           <v-file-input
@@ -92,7 +94,7 @@
         </v-col>
         <v-col :cols="flex" :offset="offset">
           <br />
-          <v-combobox
+          <v-autocomplete
             v-model="articleTags"
             :items="tags"
             label="Enter topics you are interested in."
@@ -103,7 +105,7 @@
             deletable-chips
             dense
             item-color="#111d5e"
-          ></v-combobox>
+          ></v-autocomplete>
         </v-col>
         <br /><br />
       </v-row>
@@ -405,6 +407,8 @@ export default {
       website: null,
       aboutMember: null,
       aboutMemberOriginal: null,
+      paidMember: null,
+      memberExpires: null,
       progressBarActive: false,
       windowWidth: null,
       snackbar: false,
@@ -522,6 +526,8 @@ export default {
       this.website = response.data[6][0].website;
       this.aboutMember = response.data[6][0].aboutMember;
       this.showEmail = response.data[6][0].showEmail;
+      this.paidMember = response.data[6][0].paidMember;
+      this.memberExpires = response.data[6][0].expires;
       if (this.showEmail === 0) {
         this.radioGroup = 0;
       } else if (this.showEmail === 1) {
@@ -802,7 +808,9 @@ export default {
             avatar: this.src,
             website: this.website,
             showEmail: this.showEmail,
-            aboutMember: aboutMember
+            aboutMember: aboutMember,
+            paidMember: this.paidMember,
+            memberExpires: this.memberExpires
           };
           this.$store.dispatch("setUser", member);
           this.snackBarMessage = "Details saved";

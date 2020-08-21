@@ -3,7 +3,7 @@
     <v-col :cols="flex" :offset="offset">
       <v-card max-width="1000" min-width="100%" class="mx-auto" elevation="1">
         <v-toolbar color="#111d5e" dark elevation="0">
-          <v-toolbar-title>Your Interests</v-toolbar-title>
+          <v-toolbar-title>Currently Trending</v-toolbar-title>
         </v-toolbar>
         <v-list multiple subheader>
           <v-list-item
@@ -45,10 +45,10 @@
 </template>
 
 <script>
-import DirectoryServices from "../services/DirectoryServices";
+import DirectoryServices from "@/services/DirectoryServices";
 export default {
-  name: "articlesLatesGrid",
-  props: ["tags"],
+  name: "articlesFollowingList",
+  props: ["following"],
   data: () => ({
     cards: [],
     windowWidth: null,
@@ -72,10 +72,10 @@ export default {
   async mounted() {
     window.scrollTo(0, 0);
     this.loggedIn = this.$store.state.isLoggedOn;
-    let credentials = {
-      tags: this.tags
-    };
-    let response = await DirectoryServices.yourLatestInterests(credentials);
+    // let credentials = {
+    //   following: this.following
+    // };
+    let response = await DirectoryServices.popularArticles();
 
     if (response.data.success === false) {
       this.viewLook = "mdi-format-list-bulleted";
@@ -117,11 +117,11 @@ export default {
           element.title = element.title.toUpperCase();
         });
       } else {
+        this.width = 60;
+        this.height = 60;
         this.cards.forEach(element => {
           this.flex = 10;
           this.offset = 1;
-          this.width = 60;
-          this.height = 60;
           if (this.cards.length < 3) {
             element.flex = 6;
             element.title = element.title.toUpperCase();
@@ -137,12 +137,13 @@ export default {
         let targetID = event.currentTarget.id;
         this.$router.push({ name: "articles", query: { id: targetID } });
       } else {
-        this.snackBarMessage =
-          "You have to be registered and logged in to view articles";
-        this.snackbar = true;
-        setTimeout(() => {
-          this.$router.push({ name: "login" });
-        }, 2500);
+        // this.snackBarMessage =
+        //   "You have to be registered and logged in to view articles";
+        // this.snackbar = true;
+        // setTimeout(() => {
+        //   this.$router.push({ name: "login" });
+        // }, 2500);
+        this.$emit("notLoggedIn");
       }
     }
   },

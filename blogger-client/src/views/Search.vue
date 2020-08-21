@@ -35,10 +35,10 @@
                   style="font-size: 100%;"
                 ></v-list-item-title>
                 <v-list-item-subtitle
-                  >by: {{ item.author }}</v-list-item-subtitle
+                  >by: {{ item.member_name }}</v-list-item-subtitle
                 >
                 <v-list-item-subtitle
-                  >{{ item.readtime }} min read</v-list-item-subtitle
+                  >{{ item.readTime }} read</v-list-item-subtitle
                 >
               </v-list-item-content>
               <!-- <v-spacer></v-spacer> -->
@@ -130,6 +130,7 @@ export default {
       };
       let response = await DirectoryService.searchArticles(credentials);
       this.cards = response.data;
+      // console.log(this.cards);
     }
   },
   beforeDestroy() {
