@@ -75,8 +75,12 @@
 </template>
 
 <script>
+import VueCountable from "vue-countable";
 export default {
   name: "preview-article",
+  components: {
+    VueCountable
+  },
   props: [
     "title",
     "flex",

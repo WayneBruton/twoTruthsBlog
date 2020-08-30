@@ -7,8 +7,8 @@ const nodemailer = require("nodemailer");
 const totp = require("otplib").totp;
 const otp_secret = process.env.OTP_SECRET;
 const axios = require("axios");
-const moment = require("moment")
-
+const moment = require("moment");
+const sendMail = require("./contactFiles");
 
 // CHECK TOKEN TO ENSURE LOGGED IN§
 let checktoken = (req, res, next) => {
@@ -41,6 +41,41 @@ function jwtSignUser(user) {
     expiresIn: ONE_WEEK,
   });
 }
+//GET ADMINSTATUS USERS
+router.get("/getAdmin", (req, res) => {
+  let mysql = `select id, name, isAdmin from members order by isAdmin desc, name`;
+  pool.getConnection(function (err, connection) {
+    if (err) {
+      connection.release();
+      resizeBy.send("Error with connection");
+    }
+    connection.query(mysql, function (error, result) {
+      if (error) throw error;
+      res.json(result);
+    });
+    connection.release();
+  });
+});
+
+//GET ADMINSTATUS USERS
+router.put("/updateAdmin", (req, res) => {
+  let mysql = `update members set isAdmin = ${req.body.isAdmin} where id = ${req.body.id}`;
+  pool.getConnection(function (err, connection) {
+    if (err) {
+      connection.release();
+      resizeBy.send("Error with connection");
+    }
+    connection.query(mysql, function (error, result) {
+      if (error) throw error;
+      res.json(result);
+    });
+    connection.release();
+  });
+});
+
+
+
+
 
 //CHECK EMAIL WHEN REGISTERING
 router.put("/checkEmail", (req, res) => {
@@ -219,6 +254,47 @@ router.post("/createMember", (req, res) => {
           token: jwtSignUser(userJson),
         });
       });
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        let firstName = result[1][0].name;
+        let email = result[1][0].email;
+        let message = `This is anew subscriber`;
+        let subject = `New Member`;
+        let recipient = "waynebruton@icloud.com";
+        let mailError;
+
+        const output = `
+                      <p>You have a Subscriber</p>
+                      <h3>Contact Details</h3>
+                      <ul>
+                        <li>First Name: ${firstName}</li><br>
+
+                        <li>Email: ${email}</li><br>
+                      </ul><br>
+                      <h3>Message</h3><br>
+                      <p style="background-color: purple; padding: 15px 15px; color: white;">${message}</p>
+                        `;
+        sendMail(subject, recipient, output)
+          .then(async function () {
+            if (mailError) {
+       
+            } else {
+         
+            }
+          })
+          .catch(async function (error) {
+            console.log(error);
+           
+          });
+          // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+          // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+          // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+          // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     
+    
+
       connection.release();
     });
   });
@@ -367,6 +443,7 @@ router.put("/login", (req, res) => {
             aboutMember: result[0].aboutMember,
             paidMember: result[0].paidMember,
             memberExpires: result[0].expires,
+            isAdmin: result[0].isAdmin
           };
           bcrypt.compare(user_password, hash, function (err, response) {
             if (response) {

@@ -77,13 +77,18 @@ import DirectoryService from "../services/DirectoryServices";
 export default {
   name: "contact",
   metaInfo: {
-    title: `Vellum - Contact`,
+    title: "Contact",
+    titleTemplate: "Vellum - %s",
     meta: [
       {
         name: `description`,
-        content: `Staff Policies, remote work, telecommute`
+        content: `Contact Vellum with any questions.`
       }
-    ]
+    ],
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
   },
   data() {
     return {
@@ -92,7 +97,6 @@ export default {
       content: "",
       email: "",
       name: "",
-      // lastName: "",
       userID: null,
       isLoggedOn: false,
       snackbar: false,
@@ -100,7 +104,6 @@ export default {
     };
   },
   mounted() {
-    // try {
     window.scrollTo(0, 0);
     this.isLoggedOn = this.$store.state.isLoggedOn;
     if (this.isLoggedOn) {
@@ -108,8 +111,6 @@ export default {
       this.email = this.$store.state.email;
       this.name = this.$store.state.userName;
     }
-    // this.snackBarMessage = `${this.userID}: ${this.email}; ${this.name}`;
-    // this.snackbar = true;
   },
   methods: {
     back() {
@@ -141,19 +142,13 @@ export default {
           } else {
             this.subject = "";
             this.content = "";
-            // if (!this.isLoggedOn) {
-            //   this.email = "";
-            //   this.name = "";
-            // }
             this.snackBarMessage = `${this.name}, your message has been sent. We will get back to you.`;
             this.snackbar = true;
           }
-          // console.log(credentials)
         }
       } catch (error) {
         this.snackBarMessage = "Network Error(55), please try later!";
         this.snackbar = true;
-        // this.dialog = false;
       }
     },
     reset() {

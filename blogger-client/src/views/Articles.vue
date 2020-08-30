@@ -5,6 +5,7 @@
       <v-icon color="#111d5e" x-large>mdi-chevron-left</v-icon>
       <strong>Back</strong>
     </v-btn>
+    <!-- <Advert /> -->
 
     <v-container>
       <v-col :cols="flex" :offset="offset">
@@ -238,12 +239,37 @@
 import DirectoryService from "../services/DirectoryServices";
 export default {
   name: "articles",
+  metaInfo() {
+    return {
+      title: `${this.title}`,
+      titleTemplate: "Vellum - %s",
+      meta: [
+        {
+          name: "description",
+          content:
+            "Follow this author " +
+            this.cards.member +
+            " on Vellum - " +
+            this.cards.member_name
+        },
+        { property: "og:site_name", content: "Vellum" },
+        { property: "og:type", content: "article" },
+        {
+          property: "og:url",
+          content: "https://velum.co.za/articles?id=@" + this.cards.id
+        }
+      ],
+      htmlAttrs: {
+        lang: "en",
+        amp: true
+      }
+    };
+  },
   data: () => ({
     tokenValid: true,
     currentArticle: null,
     authorId: null,
     recentArticles: [],
-    // replyComment: "",
     currentCommentID: null,
     dialog: false,
     cards: [],
@@ -271,7 +297,6 @@ export default {
     snackbar: false,
     snackBarMessage: "",
     disabled: false,
-
     timeOut: 3000,
     url: "",
     tag: "",
@@ -280,14 +305,18 @@ export default {
   components: {
     SocialMedia: () => import("../components/articles/SocialMedia"),
     Comments: () => import("../components/articles/Comments")
+    // Advert: () => import("../components/Advert"),
   },
-  async beforeMount() {},
+  async beforeMount() {
+    window.scrollTo(0, 0);
+  },
   watch: {
     windowWidth: function() {
       this.resizePage();
     }
   },
   async mounted() {
+    window.scrollTo(0, 0);
     if (!this.$store.state.isLoggedOn) {
       this.disabled = true;
     } else {
@@ -325,7 +354,6 @@ export default {
       let fullPath = this.$route.fullPath.substring(1);
       this.tag = JSON.parse(response.data[0][0].tags)[0];
       this.url = `${process.env.VUE_APP_BASEURL}${fullPath}`;
-      // console.log(this.tag)
       this.$store.dispatch("clearArticleIdBeforeLoggedIn");
       this.cards = response.data[0][0];
       this.authorId = response.data[0][0].member;
@@ -354,7 +382,6 @@ export default {
         this.votedBefore = false;
       }
       this.followingAndBookmarked();
-      // this.getComments();
     }
   },
   methods: {
@@ -387,26 +414,31 @@ export default {
         member_following: this.cards.member,
         article: this.cards.id
       };
-      let followingResponse = await DirectoryService.followingAndBookmarked(
-        followingAndBookmarked
-      );
-      if (!followingResponse.data[0].length) {
-        this.bookMarked = false;
-        this.bookmarkColor = "grey";
-      } else {
-        this.bookMarked = true;
-        this.bookmarkColor = "#111d5e";
-      }
-      if (!followingResponse.data[1].length) {
-        this.following = false;
-        this.followingColor = "grey";
-        this.followingIcon = "mdi-motion-sensor";
-        this.followingText = "follow";
-      } else {
-        this.following = true;
-        this.followingColor = "#111d5e";
-        this.followingIcon = "mdi-motion-sensor-off";
-        this.followingText = "following";
+      try {
+        let followingResponse = await DirectoryService.followingAndBookmarked(
+          followingAndBookmarked
+        );
+        if (!followingResponse.data[0].length) {
+          this.bookMarked = false;
+          this.bookmarkColor = "grey";
+        } else {
+          this.bookMarked = true;
+          this.bookmarkColor = "#111d5e";
+        }
+        if (!followingResponse.data[1].length) {
+          this.following = false;
+          this.followingColor = "grey";
+          this.followingIcon = "mdi-motion-sensor";
+          this.followingText = "follow";
+        } else {
+          this.following = true;
+          this.followingColor = "#111d5e";
+          this.followingIcon = "mdi-motion-sensor-off";
+          this.followingText = "following";
+        }
+      } catch (e) {
+        this.snackBarMessage = "Error getting articles";
+        this.snack = true;
       }
     },
     addClaps() {
@@ -447,8 +479,13 @@ export default {
           userID: this.$store.state.userId,
           claps: this.claps
         };
-        await DirectoryService.addLikes(credentials);
-        this.nowClapps = this.claps;
+        try {
+          await DirectoryService.addLikes(credentials);
+          this.nowClapps = this.claps;
+        } catch (e) {
+          this.snackBarMessage = "Error getting articles";
+          this.snack = true;
+        }
       }
     },
     async bookmark() {
@@ -467,7 +504,12 @@ export default {
         article: this.cards.id,
         toBookMark: toBookMark
       };
-      await DirectoryService.bookMark(bookMark);
+      try {
+        await DirectoryService.bookMark(bookMark);
+      } catch (e) {
+        this.snackBarMessage = "Error getting articles";
+        this.snack = true;
+      }
     },
     async follow() {
       let toFollow;
@@ -489,45 +531,55 @@ export default {
         member_following: this.cards.member,
         toFollow: toFollow
       };
-      await DirectoryService.follow(follow);
+      try {
+        await DirectoryService.follow(follow);
+      } catch (e) {
+        this.snackBarMessage = "Error getting articles";
+        this.snack = true;
+      }
     },
     async articleNavigate(event) {
-      if (this.$store.state.isLoggedOn) {
-        this.$router.push({ name: "articles", query: { id: targetID } });
-        let targetID = event.currentTarget.id;
-        let credentials = targetID;
-        this.currentArticle = targetID;
-        this.articleId = targetID;
-        let response = await DirectoryService.getArticle(credentials);
-        this.tokenValid = true;
-        this.cards = response.data[0][0];
-        this.authorId = response.data[0][0].member;
-        let recentCredentials = {
-          articleId: this.currentArticle,
-          authorId: this.authorId
-        };
-        let recentArticlesResponse = await DirectoryService.recentArticles(
-          recentCredentials
-        );
-        this.recentArticles = recentArticlesResponse.data;
-        this.cards.title = this.cards.title.toUpperCase();
-        this.publicID = this.cards.avatar;
-        this.votedMembers = [];
-        response.data[1].forEach(el => {
-          this.votedMembers.push(el.member);
-        });
-        let thisMember = this.votedMembers.filter(el => {
-          return el === this.$store.state.userId;
-        });
-        this.votedBefore = [];
-        if (thisMember.length) {
-          this.votedBefore = true;
-        } else {
-          this.votedBefore = false;
+      try {
+        if (this.$store.state.isLoggedOn) {
+          this.$router.push({ name: "articles", query: { id: targetID } });
+          let targetID = event.currentTarget.id;
+          let credentials = targetID;
+          this.currentArticle = targetID;
+          this.articleId = targetID;
+          let response = await DirectoryService.getArticle(credentials);
+          this.tokenValid = true;
+          this.cards = response.data[0][0];
+          this.authorId = response.data[0][0].member;
+          let recentCredentials = {
+            articleId: this.currentArticle,
+            authorId: this.authorId
+          };
+          let recentArticlesResponse = await DirectoryService.recentArticles(
+            recentCredentials
+          );
+          this.recentArticles = recentArticlesResponse.data;
+          this.cards.title = this.cards.title.toUpperCase();
+          this.publicID = this.cards.avatar;
+          this.votedMembers = [];
+          response.data[1].forEach(el => {
+            this.votedMembers.push(el.member);
+          });
+          let thisMember = this.votedMembers.filter(el => {
+            return el === this.$store.state.userId;
+          });
+          this.votedBefore = [];
+          if (thisMember.length) {
+            this.votedBefore = true;
+          } else {
+            this.votedBefore = false;
+          }
+          this.followingAndBookmarked();
+          this.$router.push({ name: "articles", query: { id: targetID } });
+          window.scrollTo(0, 0);
         }
-        this.followingAndBookmarked();
-        this.$router.push({ name: "articles", query: { id: targetID } });
-        window.scrollTo(0, 0);
+      } catch (e) {
+        this.snackBarMessage = "Error getting recent articles";
+        this.snack = true;
       }
     }
   },
@@ -537,7 +589,12 @@ export default {
       let credentials = {
         articleID: this.cards.id
       };
-      await DirectoryService.updateArticleLikes(credentials);
+      try {
+        await DirectoryService.updateArticleLikes(credentials);
+      } catch (e) {
+        this.snackBarMessage = "Error getting articles";
+        this.snack = true;
+      }
     }
   }
 };

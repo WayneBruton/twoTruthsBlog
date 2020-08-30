@@ -97,7 +97,6 @@
               ></v-switch>
             </v-col>
             <div class="mobileButtons">
-              <!-- <v-spacer v-if="windowWidth > 768"></v-spacer> -->
               <v-spacer></v-spacer>
               <v-btn text icon @click="exitChat">
                 Exit
@@ -132,9 +131,7 @@ export default {
       windowWidth: window.innerWidth,
       chatIcon: "mdi-chat",
       chatIconText: "Chat",
-      // iconColor: "black",
       iconColor: "white",
-      // iconColor: "#111d5e",
       snackbar: false,
       timeOut: 3000,
       dialog: false,
@@ -152,25 +149,19 @@ export default {
   watch: {
     dialog: function() {
       if (this.dialog) {
-        // console.log("WE ARE ON");
         this.chatIcon = "mdi-chat-sleep";
         this.chatIconText = "Hide";
         this.newUser();
         this.$store.dispatch("chatMessageClose");
       } else {
-        // console.log("WE ARE OFF@@@");
         this.chatIcon = "mdi-chat";
         this.chatIconText = "Chat";
-        // this.playSound = true;
       }
       if (this.windowWidth < 768) {
         this.iconColor = "#111d5e";
       } else {
         this.iconColor = "white";
       }
-      // else {
-      //   this.iconColor = "white";
-      // }
     }
   },
   methods: {
@@ -198,19 +189,25 @@ export default {
         this.message = "";
       }
     },
-
-    //LOGIN AS USER HERE
     newUser() {
       this.socket.emit("NEW_USER", {
         user: this.user
       });
     },
     async exitChat() {
-      await this.socket.emit("EXIT", {
-        user: this.user
-      });
-      this.messages.length = 0;
-      this.dialog = false;
+      try {
+        await this.socket.emit("EXIT", {
+          user: this.user
+        });
+        // this.messages.length = 0;
+        // this.dialog = false;
+      } catch (e) {
+        this.snackBarMessage = "Error leaving Chat";
+        this.snackbar = true;
+      } finally {
+        this.messages.length = 0;
+        this.dialog = false;
+      }
     }
   },
   mounted() {
@@ -235,8 +232,6 @@ export default {
                   return el !== this.user && el !== this.messageTo;
                 })
                 .sort();
-
-              // console.log("USERS", this.items);
             });
           }, 0);
         });
@@ -251,10 +246,6 @@ export default {
       }
       this.messages = [...this.messages, data];
       if (!this.dialog) {
-        // (this.snackBarMessage = "You have received a new 'Chat' message"),
-        //   this.messageReceived++;
-        // this.iconColor = "#FF0000";
-        // this.snackbar = true;
         let info = {
           chatMessage: `"${data.message}" - from: ${data.user}`
         };
@@ -277,7 +268,6 @@ export default {
           return el !== this.user;
         })
         .sort();
-      // console.log("USERS", this.items);
     });
     this.socket.on("display", data => {
       if (data.typing == true) {
@@ -300,12 +290,9 @@ export default {
 ul {
   list-style: none;
   text-align: left;
-  /* background-color: rgba(260, 270, 220, 1); */
 }
 .v-dialog {
   position: absolute;
-  /* top: 1;
-  right: 0; */
 }
 .scrollable {
   height: 100px;
@@ -317,12 +304,5 @@ ul {
   justify-content: space-between;
 }
 @media only screen and (max-width: 768px) {
-  /* .v-dialog {
-    top: 20;
-    right: 0;
-  } */
-  /* .mobileButtons {
-    flex-direction: column;
-  } */
 }
 </style>

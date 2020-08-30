@@ -4,7 +4,6 @@
       <v-col class="text-center" cols="9">
         {{ new Date().getFullYear() }} — <strong>Blog Name</strong> uses
         <strong>cookies</strong> to improve your experience.
-        <!-- <v-spacer></v-spacer> -->
       </v-col>
       <v-col class="text-right" cols="3">
         <v-btn color="green" @click="acceptCookie">Accept</v-btn>

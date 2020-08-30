@@ -50,7 +50,6 @@
           </v-textarea>
         </v-col>
         <v-col :cols="flex" :offset="offset">
-          <!-- :type="value ? 'password' : 'text'" -->
           <label justify-left
             >Followers: {{ followers }}
             {{ followers === 1 ? "follower" : "followers" }}</label
@@ -127,7 +126,25 @@
 <script>
 import DirectoryService from "../services/DirectoryServices";
 export default {
-  name: "setup",
+  name: "profileview",
+  metaInfo() {
+    return {
+      title: `${this.name}`,
+      titleTemplate: "Vellum - %s",
+      meta: [
+        {
+          name: "description",
+          content: "Follow this author " + this.name + " on Vellum - "
+        },
+        { property: "og:site_name", content: "Vellum" },
+        { property: "og:type", content: "profile" }
+      ],
+      htmlAttrs: {
+        lang: "en",
+        amp: true
+      }
+    };
+  },
   components: {},
   data() {
     return {
@@ -175,28 +192,30 @@ export default {
         this.height = 60;
       }
     }, 0);
-    let search = window.location.search;
-    let query = search.replace("?", "").split("=");
-    // let credentials = query[query.length - 1];
-    let credentials = { id: query[query.length - 1] };
-    // console.log(credentials);
-    let response = await DirectoryService.viewProfile(credentials);
-    // console.log(response.data);
-    this.email = response.data[0][0].email;
-    this.name = response.data[0][0].name;
-    this.website = response.data[0][0].website;
-    this.src = response.data[0][0].avatar;
-    this.showEmail = response.data[0][0].showEmail;
-    this.aboutMember = response.data[0][0].aboutMember;
-    this.followers = response.data[1][0].followers;
-    this.following = response.data[2][0].following;
-    let recentCredentials = {
-      authorId: query[query.length - 1]
-    };
-    let authorArticlesResponse = await DirectoryService.authorArticles(
-      recentCredentials
-    );
-    this.authorArticles = authorArticlesResponse.data;
+    try {
+      let search = window.location.search;
+      let query = search.replace("?", "").split("=");
+      let credentials = { id: query[query.length - 1] };
+      let response = await DirectoryService.viewProfile(credentials);
+      this.email = response.data[0][0].email;
+      this.name = response.data[0][0].name;
+      this.website = response.data[0][0].website;
+      this.src = response.data[0][0].avatar;
+      this.showEmail = response.data[0][0].showEmail;
+      this.aboutMember = response.data[0][0].aboutMember;
+      this.followers = response.data[1][0].followers;
+      this.following = response.data[2][0].following;
+      let recentCredentials = {
+        authorId: query[query.length - 1]
+      };
+      let authorArticlesResponse = await DirectoryService.authorArticles(
+        recentCredentials
+      );
+      this.authorArticles = authorArticlesResponse.data;
+    } catch (e) {
+      this.snackBarMessage = "Error getting Author Profile";
+      this.snack = true;
+    }
   },
   computed: {},
   watch: {

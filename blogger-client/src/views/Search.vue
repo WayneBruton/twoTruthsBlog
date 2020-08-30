@@ -41,7 +41,6 @@
                   >{{ item.readTime }} read</v-list-item-subtitle
                 >
               </v-list-item-content>
-              <!-- <v-spacer></v-spacer> -->
               <v-list-item-action>
                 <cld-image
                   :cloudName="cloudName"
@@ -65,6 +64,20 @@
 import DirectoryService from "../services/DirectoryServices";
 export default {
   name: "search",
+  metaInfo: {
+    title: "Search",
+    titleTemplate: "Vellum - %s",
+    meta: [
+      {
+        name: `description`,
+        content: `Search for articles.`
+      }
+    ],
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
+  },
   data() {
     return {
       searchTerms: "",
@@ -128,9 +141,13 @@ export default {
       let credentials = {
         searchTerms: this.searchTerms
       };
-      let response = await DirectoryService.searchArticles(credentials);
-      this.cards = response.data;
-      // console.log(this.cards);
+      try {
+        let response = await DirectoryService.searchArticles(credentials);
+        this.cards = response.data;
+      } catch (e) {
+        this.snackBarMessage = "Error fining search";
+        this.snack = true;
+      }
     }
   },
   beforeDestroy() {
@@ -139,9 +156,4 @@ export default {
 };
 </script>
 
-<style scoped>
-/* .holding {
-  display: flex;
-  width: 100%;
-} */
-</style>
+<style scoped></style>

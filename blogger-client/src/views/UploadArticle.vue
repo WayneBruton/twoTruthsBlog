@@ -70,7 +70,7 @@
             dense
             item-color="#111d5e"
           ></v-combobox>
-          <!-- {{ date }} {{ time }} -->
+          Schedule
           <v-btn
             @click="resetTime"
             color="#111d5e"
@@ -234,9 +234,22 @@
 <script>
 import { VueEditor } from "vue2-editor";
 import DirectoryService from "../services/DirectoryServices";
-// import PreviewArticle from "../components/PreviewArticle";
 export default {
   name: "uploadArticle",
+  metaInfo: {
+    title: "Upload",
+    titleTemplate: "Vellum - %s",
+    meta: [
+      {
+        name: `description`,
+        content: `Upload your article here.`
+      }
+    ],
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
+  },
   components: {
     VueEditor,
     PreviewArticle: () => import("../components/PreviewArticle")
@@ -248,17 +261,13 @@ export default {
       logosrc: require("../assets/Logo.png"),
       progressBarActive: false,
       cloudName: `${process.env.VUE_APP_CLOUDNAME}`,
-      // error: "",
       preset: `${process.env.VUE_APP_PRESET}`,
       publicID: this.$store.state.avatar,
       content: "",
-      // publishDate: "",
-
       date: new Date().toISOString().substr(0, 10),
       menu: false,
       time: new Date().toLocaleTimeString(),
       menu2: false,
-
       articleImages: 0,
       articleImagesArray: [],
       imageToDelete: {},
@@ -315,16 +324,21 @@ export default {
       });
       this.resizePage();
     }, 0);
-    let response = await DirectoryService.getTags();
-    this.articleTags = [];
-    this.tags = [];
-    response.data.forEach(el => {
-      this.tags.push(el.tag);
-    });
-    if (this.$store.state.avatar === null) {
-      this.publicID = "";
-    } else {
-      this.publicID = this.$store.state.avatar;
+    try {
+      let response = await DirectoryService.getTags();
+      this.articleTags = [];
+      this.tags = [];
+      response.data.forEach(el => {
+        this.tags.push(el.tag);
+      });
+      if (this.$store.state.avatar === null) {
+        this.publicID = "";
+      } else {
+        this.publicID = this.$store.state.avatar;
+      }
+    } catch (e) {
+      this.snackbarMessage = "Error getting tags";
+      this.snackbar = true;
     }
   },
   methods: {
@@ -342,14 +356,18 @@ export default {
       this.addNewTags();
     },
     uploadFiles() {
-      // this.sizeOfFile();
       this.uploadCoverFiles();
     },
     deleteCoverImage() {
       this.deleteCover();
     },
     async deleteCoverImageOnDiscard() {
-      this.deleteCoverImageWhenDiscarding();
+      try {
+        this.deleteCoverImageWhenDiscarding();
+      } catch (e) {
+        this.snackbarMessage = "Error Deleting images";
+        this.snackbar = true;
+      }
     },
     deleteArticleImage() {
       this.deleteCurrentArticleImage();
@@ -362,24 +380,28 @@ export default {
       if (file.size > parseInt(process.env.VUE_APP_FILESIZE)) {
         this.snackBarMessage = "Article image cannot exceed 2Mb";
         this.snackbar = true;
-        // return this.progressBarActive = false;
         return (this.snackbar = true);
       } else {
-        this.progressBarActive = true;
-        var formData = new FormData();
-        formData.append("image", file);
-        // console.log("file Size", file.size);
-        let response = await DirectoryService.uploadImageInEditor(formData);
-        let url = response.data.url;
-        let url_id = response.data.url_id;
-        let imageInfo = {
-          url,
-          url_id
-        };
-        this.articleImagesArray.push(imageInfo);
-        Editor.insertEmbed(cursorLocation, "image", url);
-        resetUploader();
-        this.progressBarActive = false;
+        try {
+          this.progressBarActive = true;
+          var formData = new FormData();
+          formData.append("image", file);
+          let response = await DirectoryService.uploadImageInEditor(formData);
+          let url = response.data.url;
+          let url_id = response.data.url_id;
+          let imageInfo = {
+            url,
+            url_id
+          };
+          this.articleImagesArray.push(imageInfo);
+          Editor.insertEmbed(cursorLocation, "image", url);
+          resetUploader();
+        } catch (e) {
+          this.snackbarMessage = "Error Uploading Image";
+          this.snackbar = true;
+        } finally {
+          this.progressBarActive = false;
+        }
       }
     },
     size() {
@@ -406,25 +428,23 @@ export default {
           tags: JSON.stringify(this.articleTags),
           isDraft: isDraft,
           newTags: JSON.stringify(this.newTags),
-          //I AM HERE TO ADD THIS FIELD
           articleImages: JSON.stringify(this.articleImagesArray),
           publish_date: `${this.date} ${this.time}`
         };
-        let response = await DirectoryService.uploadArticle(article);
-        if (response.data.Awesome && !isDraft) {
-          this.snackBarMessage = "Successfully Published";
+        try {
+          let response = await DirectoryService.uploadArticle(article);
+          if (response.data.Awesome && !isDraft) {
+            this.snackBarMessage = "Successfully Published";
+            this.snackbar = true;
+            this.articleSaved = true;
+          } else if (response.data.Awesome && isDraft) {
+            this.snackBarMessage = "Saved to Drafts";
+            this.snackbar = true;
+            this.articleSaved = true;
+          }
+        } catch (e) {
+          this.snackbarMessage = "Error uploading Article";
           this.snackbar = true;
-          this.articleSaved = true;
-          // setTimeout(() => {
-          //   this.$router.push({ name: "setup" });
-          // }, 3000);
-        } else if (response.data.Awesome && isDraft) {
-          this.snackBarMessage = "Saved to Drafts";
-          this.snackbar = true;
-          this.articleSaved = true;
-          // setTimeout(() => {
-          //   this.$router.push({ name: "setup" });
-          // }, 3000);
         }
       } else {
         this.snackBarMessage = "You must have at least one tag";

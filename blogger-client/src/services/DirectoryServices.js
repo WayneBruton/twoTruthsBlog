@@ -1,11 +1,12 @@
 import Api from "@/services/Api";
 
 export default {
-  startApp() {
-    return Api().get(`/startApp`);
+  startApp(credentials) {
+    // console.log(credentials)
+    return Api().put(`/startApp`, credentials);
   },
-  popularArticles() {
-    return Api().get(`/popularArticles`);
+  popularArticles(credentials) {
+    return Api().put(`/popularArticles`, credentials);
   },
   yourInterests(credentials) {
     // console.log(credentials)
@@ -136,5 +137,56 @@ export default {
   },
   contactForm(credentials) {
     return Api().put(`/contactForm`, credentials);
+  },
+  memberDetails(credentials) {
+    return Api().put(`/memberDetails`, credentials);
+  },
+  createSignature(credentials) {
+    // console.log(credentials);
+    return Api().put(`/createSignature`, credentials);
+  },
+  processPayment(credentials) {
+    // console.log(credentials);
+    return Api().put(`/processPayment`, credentials);
+  },
+  getAdmin() {
+    // console.log(credentials);
+    return Api().get(`/getAdmin`);
+  },
+  updateAdmin(credentials) {
+    // console.log(credentials);
+    return Api().put(`/updateAdmin`, credentials);
+  },
+  getallowedViewsNonSubscriber() {
+    // console.log(credentials);
+    return Api().get(`/getallowedViewsNonSubscriber`);
+  },
+  allowedViewsNonSubscriber(credentials) {
+    // console.log(credentials);
+    return Api().put(`/allowedViewsNonSubscriber`, credentials);
+  },
+  getPaidURL(credentials) {
+    // console.log(credentials);
+    return Api().put(`/getPaidURL`, credentials);
+  },
+  checkPaidURL(credentials) {
+    // console.log(credentials);
+    return Api().put(`/checkPaidURL`, credentials);
+  },
+  getFAQ() {
+    // console.log(credentials);
+    return Api().get(`/getFAQ`);
+  },
+  addFAQ(credentials) {
+    // console.log(credentials);
+    return Api().post(`/addFAQ`, credentials);
+  },
+  deleteFAQ(credentials) {
+    // console.log(credentials);
+    return Api().post(`/deleteFAQ`, credentials);
+  },
+  editFAQ(credentials) {
+    // console.log(credentials);
+    return Api().put(`/editFAQ`, credentials);
   }
 };

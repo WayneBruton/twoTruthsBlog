@@ -5,8 +5,10 @@ const readtime = require("estimated-read-time");
 const jwt = require("jsonwebtoken");
 var sanitizeHtml = require("sanitize-html");
 const moment = require("moment")
+const { visitor } = require("./visitorCheck")
 
-let limit = 9
+
+let limit = 200
 
 let checktoken = (req, res, next) => {
   let header = req.header("Authorization");
@@ -71,6 +73,8 @@ router.put("/yourInterests", checktoken, (req, res) => {
 router.put("/yourLatestInterests", checktoken, (req, res) => {
   // console.log(req.body.tags);
   // router.get("/startApp", (req, res) => {
+    let newlimit = (req.body.newlimit)
+    console.log("NEW INTEREST LMIT", newlimit)
     let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
     // console.log(now)
   let tags = req.body.tags;
@@ -78,7 +82,7 @@ router.put("/yourLatestInterests", checktoken, (req, res) => {
   let articles = [];
   let mysql = ``;
   tags.forEach((el) => {
-    let a = `select * from articles where tags like '%${el}%' and isDraft = false and publish_date < '${now}' order by createdAt limit ${limit};`;
+    let a = `select * from articles where tags like '%${el}%' and isDraft = false and publish_date < '${now}' order by publish_date limit ${limit};`;
     mysql = mysql + a;
   });
   pool.getConnection(function (err, connection) {
@@ -107,6 +111,9 @@ router.put("/yourLatestInterests", checktoken, (req, res) => {
           }; 
           articles.unshift(article);
         });
+        if (newlimit < articles.length) {
+          articles.length = newlimit
+        }
         articles.forEach((el, index) => {
           el.word_count = readtime.text(el.text).word_count;
           el.readtime = Math.round(readtime.text(el.text).seconds / 60);
@@ -130,6 +137,9 @@ router.put("/yourLatestInterests", checktoken, (req, res) => {
           }; 
           articles.unshift(article);
         // });
+        if (newlimit < articles.length) {
+          articles.length = newlimit
+        }
         articles.forEach((el, index) => {
           el.word_count = readtime.text(el.text).word_count;
           el.readtime = Math.round(readtime.text(el.text).seconds / 60);
@@ -156,12 +166,14 @@ router.put("/yourLatestInterests", checktoken, (req, res) => {
 });
 
 //GET LATEST ARTICLES
-router.get("/startApp", (req, res) => {
+router.put("/startApp",visitor, (req, res) => {
+  let newlimit = (req.body.newlimit)
+  console.log("NEW LIMIT",newlimit)
   // router.get("/startApp", (req, res) => {
     let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
     // console.log(now)
   let articles = [];
-  let mysql = `select * from articles where isDraft = false and publish_date < '${now}'order by createdAt limit ${limit}`;
+  let mysql = `select * from articles where isDraft = false and publish_date < '${now}'order by publish_date limit ${limit}`;
   pool.getConnection(function (err, connection) {
     if (err) {
       connection.release();
@@ -185,6 +197,10 @@ router.get("/startApp", (req, res) => {
         };
         articles.unshift(article);
       });
+      if (newlimit < articles.length) {
+        articles.length = newlimit
+
+      }
       articles.forEach((el, index) => {
         el.word_count = readtime.text(el.text).word_count;
         el.readtime = Math.round(readtime.text(el.text).seconds / 60);
@@ -206,7 +222,8 @@ router.get("/startApp", (req, res) => {
 });
 
 //GET popular ARTICLES
-router.get("/popularArticles", (req, res) => {
+router.put("/popularArticles", (req, res) => {
+  let newlimit = (req.body.newlimit)
   // router.get("/startApp", (req, res) => {
     // let start = moment(new Date()).startOf('month').format('YYYY-MM-DD')
     let start = moment(new Date()).subtract(14, 'days').format('YYYY-MM-DD')
@@ -238,6 +255,10 @@ router.get("/popularArticles", (req, res) => {
         };
         articles.unshift(article);
       });
+      if (newlimit < articles.length) {
+        articles.length = newlimit
+
+      }
       articles.forEach((el, index) => {
         el.word_count = readtime.text(el.text).word_count;
         el.readtime = Math.round(readtime.text(el.text).seconds / 60);
@@ -261,13 +282,14 @@ router.get("/popularArticles", (req, res) => {
 
 //GET LATEST ARTICLES YOU ARE FOLLOWING
 router.put("/youFollowingArticles", checktoken, (req, res) => {
+  let newlimit = (req.body.newlimit)
   // router.get("/startApp", (req, res) => {
     let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
     // console.log(now)
     let following = req.body.following
     // console.log(following)
   let articles = [];
-  let mysql = `select * from articles where member IN (?) and isDraft = false and publish_date < '${now}' order by createdAt limit ${limit}`;
+  let mysql = `select * from articles where member IN (?) and isDraft = false and publish_date < '${now}' order by publish_date limit ${limit}`;
   pool.getConnection(function (err, connection) {
     if (err) {
       connection.release();
@@ -292,6 +314,10 @@ router.put("/youFollowingArticles", checktoken, (req, res) => {
         };
         articles.unshift(article);
       });
+      if (newlimit < articles.length) {
+        articles.length = newlimit
+
+      }
       articles.forEach((el, index) => {
         el.word_count = readtime.text(el.text).word_count;
         el.readtime = Math.round(readtime.text(el.text).seconds / 60);

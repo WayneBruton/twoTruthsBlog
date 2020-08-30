@@ -36,9 +36,19 @@ const initialRoutes = require("./routes/initialRoutes"),
   memberRoutes = require("./routes/memberRoutes"),
   imageRoutes = require("./routes/imageRoutes"),
   articleRoutes = require("./routes/articleRoutes"),
-  contactRoutes = require("./routes/contactRoutes");
+  contactRoutes = require("./routes/contactRoutes"),
+  paymentRoutes = require("./routes/paymentRoutes"),
+  adminRoutes = require("./routes/adminRoutes");
 
-app.use(initialRoutes, memberRoutes, imageRoutes, articleRoutes, contactRoutes);
+app.use(
+  initialRoutes,
+  memberRoutes,
+  imageRoutes,
+  articleRoutes,
+  contactRoutes,
+  paymentRoutes,
+  adminRoutes
+);
 
 const server = app.listen(port, () => {
   console.log(`Server running on port: ${port}`);
@@ -133,7 +143,7 @@ io.on("connection", function (socket) {
     members = members.filter((el) => {
       return el.id !== socket.id;
     });
-    delete socket; 
+    delete socket;
     // console.log("members after disconnect", members);
   });
 });

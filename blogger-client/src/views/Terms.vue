@@ -242,7 +242,6 @@
             email us
             <a href="mailto:support@perfect-staff.com">email</a>
           </p>
-          <!-- <v-btn dark color="indigo" @click="back">Return</v-btn> -->
         </v-flex>
       </v-layout>
     </v-container>
@@ -252,6 +251,20 @@
 <script>
 export default {
   name: "terms",
+  metaInfo: {
+    title: "T&C's",
+    titleTemplate: "Vellum - %s",
+    meta: [
+      {
+        name: `description`,
+        content: `Our terms and conditions.`
+      }
+    ],
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
+  },
   data() {
     return {};
   },

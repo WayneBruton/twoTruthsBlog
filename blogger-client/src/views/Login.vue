@@ -82,9 +82,6 @@
                 Reset Password
               </v-btn>
             </div>
-            <!-- <div v-if="passwordResetToken !== 0">
-              {{ passwordResetToken }}
-            </div> -->
             <v-snackbar v-model="snackbar" top>
               {{ errorMessage }}
               <v-btn color="pink" text @click="snackbar = false">
@@ -103,6 +100,20 @@
 import DirectoryServices from "@/services/DirectoryServices";
 export default {
   name: "login",
+  metaInfo: {
+    title: "Login",
+    titleTemplate: "Vellum - %s",
+    meta: [
+      {
+        name: `description`,
+        content: `Log in to Vellum here.`
+      }
+    ],
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
+  },
   data: () => ({
     valid: true,
     value: true,
@@ -146,7 +157,6 @@ export default {
         this.snackbar = true;
         this.password = "";
       } else {
-        // console.log(response.data.user)
         this.snackbar = false;
         window.localStorage.setItem("token", response.data.token);
         let member = {
@@ -158,10 +168,11 @@ export default {
           showEmail: response.data.user.showEmail,
           aboutMember: response.data.user.aboutMember,
           paidMember: response.data.user.paidMember,
-          memberExpires: response.data.user.memberExpires
+          memberExpires: response.data.user.memberExpires,
+          isAdmin: response.data.user.isAdmin
         };
+        // console.log(member)
         this.$store.dispatch("setUser", member);
-        // console.log(this.$store.state.userId)
         if (this.$store.state.viewArticleIdBeforeLoggedIn !== null) {
           this.$router.push({
             name: "articles",
@@ -176,58 +187,70 @@ export default {
       let user = {
         email: this.email
       };
-      let response = await DirectoryServices.resetPasswordToken(user);
-      // console.log(response.data.token);
-      this.passwordResetToken = response.data.token;
-      this.errorMessage = "An OTP has been sent to you.";
-      this.snackbar = true;
-      this.clearResetToken();
+      try {
+        let response = await DirectoryServices.resetPasswordToken(user);
+        this.passwordResetToken = response.data.token;
+        this.errorMessage = "An OTP has been sent to you.";
+        this.snackbar = true;
+        this.clearResetToken();
+      } catch (e) {
+        this.snackBarMessage = "Error getting articles";
+        this.snack = true;
+      }
     },
     clearResetToken() {
       setTimeout(() => {
         this.passwordResetToken = null;
       }, 1800000);
-      // }, 60000);
     },
     cancelResetPassword() {
       this.passwordResetToken = null;
     },
     async resetPassword() {
-      if (
-        this.newPassword === this.newPasswordRepeat &&
-        this.passwordResetToken === this.enteredToken
-      ) {
-        let user = {
-          email: this.email,
-          password: this.newPassword
-        };
-        let response = await DirectoryServices.resetPassword(user);
-        // console.log(response.data);
-        if (response.data.success) {
-          this.errorMessage = "Success.";
-          this.passwordResetToken = null;
-          this.password = "";
-          this.snackbar = true;
+      try {
+        if (
+          this.newPassword === this.newPasswordRepeat &&
+          this.passwordResetToken === this.enteredToken
+        ) {
+          let user = {
+            email: this.email,
+            password: this.newPassword
+          };
+          let response = await DirectoryServices.resetPassword(user);
+          if (response.data.success) {
+            this.errorMessage = "Success.";
+            this.passwordResetToken = null;
+            this.password = "";
+            this.snackbar = true;
+          } else {
+            this.errorMessage = "Unsuccessful, please try again later.";
+            this.snackbar = true;
+          }
         } else {
-          this.errorMessage = "Unsuccessful, please try again later.";
+          this.errorMessage = "Passwords or token does not match.";
           this.snackbar = true;
         }
-      } else {
-        this.errorMessage = "Passwords or token does not match.";
-        this.snackbar = true;
+      } catch (e) {
+        this.snackBarMessage = "Error getting articles";
+        this.snack = true;
       }
     },
     async checkEmail() {
       let email = {
         email: this.email
       };
-      let response = await DirectoryServices.checkEmail(email);
-      if (response.data.length === 0) {
-        this.emailExists = false;
-        this.errorMessage = "Email not on system, Signup?";
-        this.snackbar = true;
-      } else {
-        this.emailExists = true;
+      try {
+        let response = await DirectoryServices.checkEmail(email);
+        if (response.data.length === 0) {
+          this.emailExists = false;
+          this.errorMessage = "Email not on system, Signup?";
+          this.snackbar = true;
+        } else {
+          this.emailExists = true;
+        }
+      } catch (e) {
+        this.snackBarMessage = "Error checking email";
+        this.snack = true;
       }
     }
   },

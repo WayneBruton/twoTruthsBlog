@@ -87,6 +87,20 @@ const routes = [
     name: "privacypolicy",
     component: () =>
       import(/* webpackChunkName: "Contact" */ "../views/PrivacyPolicy.vue")
+  },
+  {
+    path: "/pmtSuccessfull",
+    name: "pmtSuccessfull",
+    component: () =>
+      import(
+        /* webpackChunkName: "PmtSuccessfull" */ "../views/PmtSuccessfull.vue"
+      )
+  },
+  {
+    path: "/dashboard",
+    name: "dashboard",
+    component: () =>
+      import(/* webpackChunkName: "Dashboard" */ "../views/Dashboard.vue")
   }
 ];
 

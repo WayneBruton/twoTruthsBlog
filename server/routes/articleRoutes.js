@@ -5,7 +5,9 @@ const jwt = require("jsonwebtoken");
 var sanitizeHtml = require("sanitize-html");
 const readtime = require("estimated-read-time");
 var cloudinary = require("cloudinary").v2;
-const moment = require("moment")
+const moment = require("moment");
+const { sendErrorReport, mailErrorResult } = require("./contactFiles");
+// const { visitor } = require("./visitorCheck")
 
 // CHECK TOKEN TO ENSURE LOGGED IN§
 let checktoken = (req, res, next) => {
@@ -29,6 +31,8 @@ let checktoken = (req, res, next) => {
     });
   }
 };
+
+
 
 // CLOUDINARY CONFIG - STICK THIS IN ENV FILE
 cloudinary.config({
@@ -57,8 +61,12 @@ router.put("/deleteArticle", (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
-      res.json(result);
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+      } else {
+        res.json(result);
+      }
+      // }
     });
     connection.release();
   });
@@ -87,9 +95,12 @@ router.post("/uploadArticle", (req, res) => {
     }
     if (newTags.length) {
       for (i = 0; i < newTags.length; i++) {
-        let sql1 = `insert into tags (tag) values ("${newTags[i]}")`;
+        let sql1 = `insert ignore into tags (tag) values ("${newTags[i]}")`;
         connection.query(sql1, function (error, result) {
-          if (error) throw error;
+          if (error) {
+            sendErrorReport(sql1, req.path, error);
+            res.json({ error: true });
+          }
         });
       }
     }
@@ -98,7 +109,9 @@ router.post("/uploadArticle", (req, res) => {
       tagsToUpdate.forEach((el) => {
         let myTagsql = `Update tags set timesUsed = timesUsed + 1 where tag = '${el}'`;
         connection.query(myTagsql, function (error, result) {
-          if (error) throw error;
+          if (error) {
+            sendErrorReport(myTagsql, req.path, error);
+          }
         });
       });
     }
@@ -106,8 +119,11 @@ router.post("/uploadArticle", (req, res) => {
                   ${req.body.member}, '${req.body.member_name}', '${req.body.coverImgURL}', '${req.body.coverImgID}', '${req.body.title}', '${req.body.credit}', '${content}', '${req.body.tags}', ${word_count}, '${read_time} Min', '${req.body.articleImages}', ${req.body.isDraft}, '${req.body.publish_date}'
       )`;
     connection.query(sql2, function (error, result) {
-      if (error) throw error;
-      res.json({ Awesome: "It Works!!!!" });
+      if (error) {
+        sendErrorReport(sql2, req.path, error);
+      } else {
+        res.json({ Awesome: "It Works!!!!" });
+      }
     });
     connection.release();
   });
@@ -148,7 +164,10 @@ router.post("/saveArticle", (req, res) => {
       for (i = 0; i < newTags.length; i++) {
         let sql1 = `insert into tags (tag) values ("${newTags[i]}")`;
         connection.query(sql1, function (error, result) {
-          if (error) throw error;
+          if (error) {
+            sendErrorReport(sql1, req.path, error);
+            // res.json({ error: true });
+          }
         });
       }
     }
@@ -157,7 +176,9 @@ router.post("/saveArticle", (req, res) => {
       tagsToUpdate.forEach((el) => {
         let myTagsql = `Update tags set timesUsed = timesUsed + 1 where tag = '${el}'`;
         connection.query(myTagsql, function (error, result) {
-          if (error) throw error;
+          if (error) {
+            sendErrorReport(myTagsql, req.path, error);
+          }
         });
       });
     }
@@ -166,8 +187,11 @@ router.post("/saveArticle", (req, res) => {
                   tags = '${req.body.tags}', wordCount = ${word_count}, readTime = '${read_time} Min', articleImages = '${req.body.articleImages}', 
                   isDraft = ${req.body.isDraft}, publish_date = '${req.body.publish_date}' where id = ${req.body.id}`;
     connection.query(sql2, function (error, result) {
-      if (error) throw error;
-      res.json({ Awesome: "It Works!!!!" });
+      if (error) {
+        sendErrorReport(sql2, req.path, error);
+      } else {
+        res.json({ Awesome: "It Works!!!!" });
+      }
     });
     connection.release();
   });
@@ -186,8 +210,11 @@ router.post("/deleteEditArticle", (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
-      res.json({ Article: "Deleted" });
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+      } else {
+        res.json({ Article: "Deleted" });
+      }
     });
     connection.release();
   });
@@ -202,8 +229,11 @@ router.get("/getTags", (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
-      res.json(result);
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+      } else {
+        res.json(result);
+      }
     });
     connection.release();
   });
@@ -224,25 +254,28 @@ router.put("/getComments", (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
-      result[0].forEach((el) => {
-        let commentID = el.id;
-        // el.reply = []
-        let replies = result[1].filter((reply) => {
-          return reply.replyTo === commentID;
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+      } else {
+        result[0].forEach((el) => {
+          let commentID = el.id;
+          // el.reply = []
+          let replies = result[1].filter((reply) => {
+            return reply.replyTo === commentID;
+          });
+          el.reply = replies;
         });
-        el.reply = replies;
-      });
 
-      // console.log("&&&&&&&&&",result[0]);
-      res.json(result[0]);
+        // console.log("&&&&&&&&&",result[0]);
+        res.json(result[0]);
+      }
     });
     connection.release();
   });
 });
 
 //ADD A COMMENT
-router.post("/addComment", (req, res) => { 
+router.post("/addComment", (req, res) => {
   const searchRegExpP = /"/g;
   const replaceWithP = `'`;
   let comment = req.body.comment
@@ -252,27 +285,27 @@ router.post("/addComment", (req, res) => {
     .replace(searchRegExpP, replaceWithP)
     .split(/\s+/)
     .join(" ");
-    // console.log("commentAAA",comment)
-    let now = new Date()
-    let month;
-    let day;
-    if (now.getMonth() + 1 < 10) {
-      month = `0${now.getMonth() + 1}`
-    } else {
-      month = `${now.getMonth() + 1}`
-    }
-    if (now.getDate() + 1 < 10) {
-      day = `0${now.getDate()}`
-    } else {
-      day = `${now.getDate()}`
-    }
-    let year = now.getFullYear().toString()
-    year = year.substring(year.length - 2,year.length)
+  // console.log("commentAAA",comment)
+  let now = new Date();
+  let month;
+  let day;
+  if (now.getMonth() + 1 < 10) {
+    month = `0${now.getMonth() + 1}`;
+  } else {
+    month = `${now.getMonth() + 1}`;
+  }
+  if (now.getDate() + 1 < 10) {
+    day = `0${now.getDate()}`;
+  } else {
+    day = `${now.getDate()}`;
+  }
+  let year = now.getFullYear().toString();
+  year = year.substring(year.length - 2, year.length);
 
-
-
-    // console.log(now.getFullYear(),now.getDate(), now.getMonth() + 1,now.getHours(),now.getMinutes() )
-  comment = `<p style='color: grey; margin-right:7px;'><small>By: ${req.body.memberName} - ${day}/${month}/${year} ${now.getHours()}:${now.getMinutes()}  </small></p>
+  // console.log(now.getFullYear(),now.getDate(), now.getMonth() + 1,now.getHours(),now.getMinutes() )
+  comment = `<p style='color: grey; margin-right:7px;'><small>By: ${
+    req.body.memberName
+  } - ${day}/${month}/${year} ${now.getHours()}:${now.getMinutes()}  </small></p>
               <br /><p style='white-space: pre-wrap;'><small>   ${comment}</small></p>`;
   const mysql = `insert into comments (commentBy, articleNumber, comment) values (${req.body.commentBy}, ${req.body.articleNumber},"${comment}")`;
   // console.log(req.body);
@@ -305,22 +338,24 @@ router.post("/addReply", (req, res) => {
     .replace(searchRegExpP, replaceWithP)
     .split(/\s+/)
     .join(" ");
-    let now = new Date()
-    let month;
-    let day;
-    if (now.getMonth() + 1 < 10) {
-      month = `0${now.getMonth() + 1}`
-    } else {
-      month = `${now.getMonth() + 1}`
-    }
-    if (now.getDate() < 10) {
-      day = `0${now.getDate()}`
-    } else {
-      day = `${now.getDate()}`
-    }
-    let year = now.getFullYear().toString()
-    year = year.substring(year.length - 2,year.length)
-  comment = `<p style='color: grey;margin-right:7px;'><small>By: ${req.body.memberName} - ${day}/${month}/${year} ${now.getHours()}:${now.getMinutes()}  </small></p>
+  let now = new Date();
+  let month;
+  let day;
+  if (now.getMonth() + 1 < 10) {
+    month = `0${now.getMonth() + 1}`;
+  } else {
+    month = `${now.getMonth() + 1}`;
+  }
+  if (now.getDate() < 10) {
+    day = `0${now.getDate()}`;
+  } else {
+    day = `${now.getDate()}`;
+  }
+  let year = now.getFullYear().toString();
+  year = year.substring(year.length - 2, year.length);
+  comment = `<p style='color: grey;margin-right:7px;'><small>By: ${
+    req.body.memberName
+  } - ${day}/${month}/${year} ${now.getHours()}:${now.getMinutes()}  </small></p>
               <br /><p style='white-space: pre-wrap;'> <small>${comment}</small></p>`;
   // const mysql = `insert into comments (commentBy, articleNumber, comment) values (${req.body.commentBy}, ${req.body.articleNumber},"${comment}")`;
   const mysql = `insert into replies (commentBy, articleNumber, replyTo, comment) values (${req.body.commentBy}, ${req.body.articleNumber}, ${req.body.replyTo}, "${comment}")`;
@@ -347,9 +382,9 @@ router.post("/addReply", (req, res) => {
 router.put("/deleteComment", (req, res) => {
   // console.log(req.body);
   // res.json({ success: true });
-  let mysql1 = `delete from replies where replyTo = ${req.body.id}`
-  let mysql2 = `delete from comments where id = ${req.body.id}`
-  let mysql = `${mysql1};${mysql2}`
+  let mysql1 = `delete from replies where replyTo = ${req.body.id}`;
+  let mysql2 = `delete from comments where id = ${req.body.id}`;
+  let mysql = `${mysql1};${mysql2}`;
   pool.getConnection(function (err, connection) {
     if (err) {
       connection.release();
@@ -357,11 +392,11 @@ router.put("/deleteComment", (req, res) => {
     }
     connection.query(mysql, function (error, result) {
       if (error) {
-        console.log(error)
-      res.json({success: false});
+        console.log(error);
+        res.json({ success: false });
       } else {
-      // console.log(result)
-      res.json({success: true});
+        // console.log(result)
+        res.json({ success: true });
       }
     });
     connection.release();
@@ -369,7 +404,7 @@ router.put("/deleteComment", (req, res) => {
 });
 //DELETE REPLY
 router.put("/deleteReply", (req, res) => {
-  let mysql = `delete from replies where id = ${req.body.id}`
+  let mysql = `delete from replies where id = ${req.body.id}`;
   // console.log(req.body);
   pool.getConnection(function (err, connection) {
     if (err) {
@@ -378,21 +413,21 @@ router.put("/deleteReply", (req, res) => {
     }
     connection.query(mysql, function (error, result) {
       if (error) {
-        console.log(error)
-      res.json({success: false});
+        console.log(error);
+        res.json({ success: false });
       } else {
-      // console.log(result)
-      res.json({success: true});
+        // console.log(result)
+        res.json({ success: true });
       }
     });
     connection.release();
   });
 });
 //SEARCH ARTICLES
-router.put('/searchArticles', (req, res) => {
+router.put("/searchArticles", (req, res) => {
   // console.log(req.body.searchTerms)
-  let mysql = `SELECT id, title, member_name, coverimgID, readTime, MATCH (title,content,member_name) AGAINST ('${req.body.searchTerms}') as score FROM articles WHERE MATCH (title,content,member_name) AGAINST ('${req.body.searchTerms}') > 0 and isDraft = 0 ORDER BY score DESC`;
-  
+  let mysql = `SELECT id, title, member_name, coverimgID, readTime, MATCH (title,content,member_name) AGAINST ('${req.body.searchTerms}') as score FROM articles WHERE MATCH (title,content,member_name, tags) AGAINST ('${req.body.searchTerms}') > 0 and isDraft = 0 ORDER BY score DESC`;
+
   // console.log(mysql)
   pool.getConnection(function (err, connection) {
     if (err) {
@@ -400,47 +435,53 @@ router.put('/searchArticles', (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
-      result.forEach((el) => {
-        el.title = el.title.toUpperCase()
-      })
-      // console.log(result)
-      res.json(result);
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+      } else {
+        result.forEach((el) => {
+          el.title = el.title.toUpperCase();
+        });
+        // console.log(result)
+        res.json(result);
+      }
     });
     connection.release();
   });
-})
+});
 // GET Author ARTICLES
-router.put('/authorArticles', (req, res) => {
-  let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+router.put("/authorArticles", (req, res) => {
+  let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
   let mysql = `select a.id, a.member, a.coverImgURL, a.coverImgID, a.title, a.readTime
                   from articles a 
                   where 
-                  a.member = ${req.body.authorId} and a.publish_date < '${now}' order by a.id desc`;
-  console.log(mysql)
+                  a.member = ${req.body.authorId} and a.publish_date < '${now}' and isDraft = false order by a.id desc`;
+  console.log(mysql);
   pool.getConnection(function (err, connection) {
     if (err) {
       connection.release();
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
-      // console.log(result)
-      res.json(result);
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+      } else {
+        // console.log(result)
+        res.json(result);
+      }
     });
     connection.release();
   });
-})
+});
 
 // GET RECENT ARTICLES
-router.put('/recentArticles', (req, res) => {
-  let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+router.put("/recentArticles", (req, res) => {
+  let now = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
   let mysql = `select a.id, a.member, a.coverImgURL, a.coverImgID, a.title, a.readTime
                   from articles a 
                   where 
-                  a.id <> ${req.body.articleId} and a.member = ${req.body.authorId} and a.publish_date < '${now}' order by a.id desc limit 3`;
+                  a.id <> ${req.body.articleId} and a.member = ${req.body.authorId} and a.publish_date < '${now}' and isDraft = false order by a.id desc limit 3`;
   // console.log(mysql)
   pool.getConnection(function (err, connection) {
     if (err) {
@@ -448,22 +489,28 @@ router.put('/recentArticles', (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
+      if (error) {
+        console.log(error);
+        res.json({ error: "An error occurred" });
+      }
       // console.log(result)
       res.json(result);
     });
     connection.release();
   });
-})
-
-
+});
 
 //Navigate to the article
 router.get("/getArticle/:number", (req, res) => {
+  // console.log(req.path)
+  // var ip =  req.connection.remoteAddress ||
+  //    req.socket.remoteAddress ||
+  //    req.connection.socket.remoteAddress;
+  //    console.log(ip);
   let mysql1 = `select a.id, a.member, a.member_name, a.coverImgURL, a.coverImgID, a.title, a.credit, a.content, a.tags, a.claps, a.wordCount, a.readTime, a.createdAt,
                   m.email, m.avatar, m.website, a.articleImages, m.showEmail
                   from articles a, members m 
-                  where 
+                  where
                   a.id = ${req.params.number} and a.member = m.id`;
   let mysql2 = `select distinct member from articleLikes where article = '${req.params.number}'`;
   let mysql = `${mysql1};${mysql2}`;
@@ -473,18 +520,24 @@ router.get("/getArticle/:number", (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
-      res.json(result);
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+        res.json({ error: true });
+      } else {
+        res.json(result);
+      }
     });
+    // });
     connection.release();
   });
 });
+
 //Navigate to the Draft
 router.get("/getDraft/:number", checktoken, (req, res) => {
   let mysql = `select a.id, a.member, a.member_name, a.coverImgURL, a.coverImgID, a.title, a.credit, a.content, a.tags, a.claps, a.wordCount, a.readTime, a.createdAt, a.publish_date,
                   m.email, m.avatar, m.website, a.articleImages
                   from articles a, members m 
-                  where 
+                  where
                   a.id = ${req.params.number} and a.member = m.id`;
   pool.getConnection(function (err, connection) {
     if (err) {
@@ -492,15 +545,18 @@ router.get("/getDraft/:number", checktoken, (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
-      res.json(result);
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+      } else {
+        res.json(result);
+      }
     });
     connection.release();
   });
 });
 
 //Navigate to the profle
-router.put("/viewProfile", checktoken, (req, res) => {
+router.put("/viewProfile", checktoken,  (req, res) => {
   let mysql1 = `select m.id, m.name, m.email, m.avatar, m.website , m.tags, m.aboutMember, m.showEmail from members m where m.id = ${req.body.id}`;
   let mysql2 = `select count(member_following) as followers from follows where member_following = ${req.body.id}`;
   let mysql3 = `select count(member) as following from  follows where member = ${req.body.id}`;
@@ -511,8 +567,11 @@ router.put("/viewProfile", checktoken, (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
-      res.json(result);
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+      } else {
+        res.json(result);
+      }
     });
     connection.release();
   });
@@ -528,10 +587,10 @@ router.post("/updateArticleLikes", checktoken, (req, res) => {
     }
     connection.query(mysql, function (error, result) {
       if (error) {
-        console.log(error)
-      res.json({success: false});
+        console.log(error);
+        res.json({ success: false });
       } else {
-      res.json({success: true});
+        res.json({ success: true });
       }
     });
     connection.release();
@@ -549,16 +608,24 @@ router.post("/addLikes", (req, res) => {
       resizeBy.send("Error with connection");
     }
     connection.query(mysql, function (error, result) {
-      if (error) throw error;
+      if (error) {
+        sendErrorReport(mysql, req.path, error);
+      }
       if (result.length) {
         connection.query(mysql3, function (error, result) {
-          if (error) throw error;
-          res.json(result);
+          if (error) {
+            sendErrorReport(mysql3, req.path, error);
+          } else {
+            res.json(result);
+          }
         });
       } else {
         connection.query(mysql2, function (error, result) {
-          if (error) throw error;
-          res.json(result);
+          if (error) {
+            sendErrorReport(mysql2, req.path, error);
+          } else {
+            res.json(result);
+          }
         });
       }
     });
@@ -578,39 +645,36 @@ router.put("/getHistoryLikes", checktoken, (req, res) => {
     }
     connection.query(mysql, function (error, result) {
       if (error) {
-        console.log(error)
-      res.json({success: false});
+        console.log(error);
+        res.json({ success: false });
       } else {
-        let currentMonth = moment(new Date()).format("MMM-YYYY")
+        let currentMonth = moment(new Date()).format("MMM-YYYY");
         result.forEach((el) => {
-          el.month = moment(el.createdAt).format("MMM-YYYY")
-          el.currentMonth = currentMonth
-        })
+          el.month = moment(el.createdAt).format("MMM-YYYY");
+          el.currentMonth = currentMonth;
+        });
         // console.log(result)
         let currentMonthLikes = result.reduce((prev, el) => {
           if (el.month == el.currentMonth) {
-            return prev = el.claps + prev
+            return (prev = el.claps + prev);
           } else {
-            return prev = prev
+            return (prev = prev);
           }
-      }, 0)
-        let totalLikes = result.reduce((prev, el ) => {
-          return prev = el.claps + prev
-        },0)
-        
-        
+        }, 0);
+        let totalLikes = result.reduce((prev, el) => {
+          return (prev = el.claps + prev);
+        }, 0);
+
         let allLikes = {
           total: totalLikes,
-          currentMonth: currentMonthLikes
-        }
+          currentMonth: currentMonthLikes,
+        };
         // console.log(allLikes)
-      res.json(allLikes);
+        res.json(allLikes);
       }
     });
     connection.release();
   });
 });
-
-
 
 module.exports = router;

@@ -116,7 +116,8 @@
                             icon
                             v-if="
                               item.commentBy === item.currentUser ||
-                                item.writtenBy === item.currentUser
+                                item.writtenBy === item.currentUser ||
+                                item.isAdmin == 1
                             "
                             :id="item.id"
                             @click="deleteComment($event)"
@@ -197,7 +198,8 @@
                                 icon
                                 v-if="
                                   reply.commentBy === item.currentUser ||
-                                    item.writtenBy === item.currentUser
+                                    item.writtenBy === item.currentUser ||
+                                    item.isAdmin == 1
                                 "
                                 :id="reply.id"
                                 @click="deleteReply($event)"
@@ -305,10 +307,15 @@ export default {
           articleNumber: this.currentArticle, //PROP???
           comment: this.addComment
         };
-        await DirectoryService.addComment(credentials);
-        this.addComment = "";
-        this.showComments = false;
-        this.displayComments();
+        try {
+          await DirectoryService.addComment(credentials);
+          this.addComment = "";
+          this.showComments = false;
+          this.displayComments();
+        } catch (e) {
+          this.snackBarMessage = "Comment can't be empty";
+          this.snackbar = true;
+        }
       } else {
         this.snackBarMessage = "Comment can't be empty";
         this.snackbar = true;
@@ -334,23 +341,35 @@ export default {
       let comments = {
         id: credentials
       };
-      let commentsResponse = await DirectoryService.getComments(comments);
+      try {
+        let commentsResponse = await DirectoryService.getComments(comments);
 
-      commentsResponse.data.forEach(el => {
-        el.currentUser = this.$store.state.userId;
-        // el.writtenBy = this.cards.member;
-        el.writtenBy = this.authorId;
-      });
-      this.comments = commentsResponse.data;
-      this.showComments = true;
+        commentsResponse.data.forEach(el => {
+          el.currentUser = this.$store.state.userId;
+          el.isAdmin = this.$store.state.isAdmin;
+          // el.writtenBy = this.cards.member;
+          el.writtenBy = this.authorId;
+        });
+        this.comments = commentsResponse.data;
+        // console.log(this.comments);
+        this.showComments = true;
+      } catch (e) {
+        this.snackBarMessage = "Something went wrong, please try later";
+        this.snackbar = true;
+      }
     },
     async deleteComment(event) {
       let targetID = parseInt(event.currentTarget.id);
       let credentials = {
         id: targetID
       };
-      await DirectoryService.deleteComment(credentials);
-      this.getComments();
+      try {
+        await DirectoryService.deleteComment(credentials);
+        this.getComments();
+      } catch (e) {
+        this.snackBarMessage = "Error deleting comment";
+        this.snackbar = true;
+      }
     },
     replyToComment(event) {
       let targetID = parseInt(event.currentTarget.id);
@@ -367,8 +386,13 @@ export default {
       let credentials = {
         id: targetID
       };
-      await DirectoryService.deleteReply(credentials);
-      this.getComments();
+      try {
+        await DirectoryService.deleteReply(credentials);
+        this.getComments();
+      } catch (e) {
+        this.snackBarMessage = "Error deleting comment";
+        this.snackbar = true;
+      }
     },
     async postReply(event) {
       let targetID = parseInt(event.currentTarget.id);
@@ -380,10 +404,15 @@ export default {
           replyTo: this.currentCommentID,
           comment: this.replyComment
         };
-        await DirectoryService.addReply(credentials);
-        this.dialog = false;
-        this.replyComment = "";
-        this.getComments();
+        try {
+          await DirectoryService.addReply(credentials);
+          this.dialog = false;
+          this.replyComment = "";
+          this.getComments();
+        } catch (e) {
+          this.snackBarMessage = "Error posting a reply";
+          this.snackbar = true;
+        }
       } else {
         this.snackBarMessage = "Reply cannot be empty";
         this.snackbar = true;

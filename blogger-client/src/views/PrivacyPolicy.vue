@@ -186,13 +186,18 @@
 export default {
   name: "privacy",
   metaInfo: {
-    title: `PerfectStaff - Privacy`,
+    title: "Privacy",
+    titleTemplate: "Vellum - %s",
     meta: [
       {
         name: `description`,
-        content: `Privacy policy and concerns`
+        content: `You confidentiality is assured by our privacy policy.`
       }
-    ]
+    ],
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
   },
   methods: {
     back() {

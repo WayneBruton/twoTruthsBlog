@@ -4,8 +4,6 @@
       <v-row dense justify-center>
         <v-col :cols="flex" :offset="offset">
           <h1>Profile</h1>
-          <!-- <h2>{{ this.paidMember }}</h2>
-          <h2>Expires{{ this.memberExpires }}</h2> -->
         </v-col>
         <v-col :cols="flex" :offset="offset">
           <v-file-input
@@ -207,8 +205,6 @@
                 elevation="0"
                 v-if="cards.length"
               >
-                <!-- MAKE THIS FOR GREATER THAN 5?? -->
-                <!-- v-if="cardsFiltered.length > 1" -->
                 <v-text-field
                   v-model="search"
                   placeholder="search by title"
@@ -237,7 +233,7 @@
                       <cld-transformation
                         crop="fill"
                         quality="auto"
-                        angle="10"
+                        angle="0"
                       />
                     </cld-image>
                   </v-list-item-icon>
@@ -384,6 +380,24 @@
 import DirectoryService from "../services/DirectoryServices";
 export default {
   name: "setup",
+  metaInfo() {
+    return {
+      title: `${this.name}`,
+      titleTemplate: "Vellum - %s",
+      meta: [
+        {
+          name: "description",
+          content: "All my info " + this.name + " on Vellum."
+        },
+        { property: "og:site_name", content: "Vellum" },
+        { property: "og:type", content: "profile" }
+      ],
+      htmlAttrs: {
+        lang: "en",
+        amp: true
+      }
+    };
+  },
   components: {},
   data() {
     return {
@@ -415,7 +429,6 @@ export default {
       snackBarMessage: "",
       timeOut: 3000,
       reverseIcon: "mdi-sort-descending",
-      // cardsFiltered:[],
       cards: [],
       item: 0,
       search: "",
@@ -490,7 +503,6 @@ export default {
         this.updatePopularTagsArray();
       }
       this.search = "";
-      // console.log("cards", this.cards);
     },
     windowWidth: function() {
       this.resizePage();
@@ -518,83 +530,84 @@ export default {
       let credentials = {
         memberId: this.$store.state.userId
       };
-      let response = await DirectoryService.myStuff(credentials);
-      // console.log(response.data);
-      this.name = response.data[6][0].name;
-      this.nameOriginal = response.data[6][0].name;
-      this.email = response.data[6][0].email;
-      this.website = response.data[6][0].website;
-      this.aboutMember = response.data[6][0].aboutMember;
-      this.showEmail = response.data[6][0].showEmail;
-      this.paidMember = response.data[6][0].paidMember;
-      this.memberExpires = response.data[6][0].expires;
-      if (this.showEmail === 0) {
-        this.radioGroup = 0;
-      } else if (this.showEmail === 1) {
-        this.radioGroup = 1;
+      try {
+        let response = await DirectoryService.myStuff(credentials);
+        this.name = response.data[6][0].name;
+        this.nameOriginal = response.data[6][0].name;
+        this.email = response.data[6][0].email;
+        this.website = response.data[6][0].website;
+        this.aboutMember = response.data[6][0].aboutMember;
+        this.showEmail = response.data[6][0].showEmail;
+        this.paidMember = response.data[6][0].paidMember;
+        this.memberExpires = response.data[6][0].expires;
+        if (this.showEmail === 0) {
+          this.radioGroup = 0;
+        } else if (this.showEmail === 1) {
+          this.radioGroup = 1;
+        }
+        if (response.data[5].length) {
+          this.articleTags = JSON.parse(response.data[5][0].tags);
+        }
+        this.articleTagsOriginal = this.articleTags;
+        this.aboutMemberOriginal = this.aboutMember;
+        this.tags = [];
+        response.data[3].forEach(el => {
+          this.tags.push(el.tag);
+        });
+        this.popularTags = response.data[3];
+        let drafts = response.data[2].filter(el => {
+          return el.isDraft === 1;
+        });
+        let published = response.data[2].filter(el => {
+          return el.isDraft !== 1;
+        });
+        this.bookmarks = response.data[0];
+        this.following = response.data[1];
+        this.followers = response.data[4];
+        this.drafts = drafts;
+        this.published = published;
+        this.cards = [];
+        if (this.tab === null || this.tab === "tab-1") {
+          this.updateBookmarksArray();
+        } else if (this.tab === "tab-2") {
+          this.updateFolowingArray();
+        } else if (this.tab === "tab-3") {
+          this.updatePublishedArray();
+        } else if (this.tab === "tab-4") {
+          this.updateDraftsArray();
+        } else if (this.tab === "tab-5") {
+          this.updateFollowersArray();
+        } else if (this.tab === "tab-6") {
+          this.updatePopularTagsArray();
+        }
+        this.popularTagsSort();
+        this.getHistoryLikes();
+      } catch (e) {
+        this.snackBarMessage = "Something Went Wrong";
+        this.snackbar = true;
       }
-      if (response.data[5].length) {
-        this.articleTags = JSON.parse(response.data[5][0].tags);
-      }
-      this.articleTagsOriginal = this.articleTags;
-      this.aboutMemberOriginal = this.aboutMember;
-      this.tags = [];
-      response.data[3].forEach(el => {
-        this.tags.push(el.tag);
-      });
-      this.popularTags = response.data[3];
-      let drafts = response.data[2].filter(el => {
-        return el.isDraft === 1;
-      });
-      // console.log("DRAFTS", drafts);
-      let published = response.data[2].filter(el => {
-        return el.isDraft !== 1;
-      });
-      this.bookmarks = response.data[0];
-      this.following = response.data[1];
-      this.followers = response.data[4];
-      this.drafts = drafts;
-      this.published = published;
-      // console.log(this.bookmarks);
-      // console.log(this.following);
-      // console.log(this.drafts);
-      // console.log(this.published);
-      this.cards = [];
-      if (this.tab === null || this.tab === "tab-1") {
-        this.updateBookmarksArray();
-      } else if (this.tab === "tab-2") {
-        this.updateFolowingArray();
-      } else if (this.tab === "tab-3") {
-        this.updatePublishedArray();
-      } else if (this.tab === "tab-4") {
-        this.updateDraftsArray();
-      } else if (this.tab === "tab-5") {
-        this.updateFollowersArray();
-      } else if (this.tab === "tab-6") {
-        this.updatePopularTagsArray();
-      }
-      this.popularTagsSort();
-      this.getHistoryLikes();
     },
     //GET HISTORICAL LIKES
     async getHistoryLikes() {
-      let credentials = {
-        id: this.$store.state.userId
-      };
-      let response = await DirectoryService.getHistoryLikes(credentials);
-      // console.log(response.data);
-      if (response.data.currentMonth) {
-        this.currentMonthLikes = response.data.currentMonth;
-      } else {
-        this.currentMonthLikes = 0;
+      try {
+        let credentials = {
+          id: this.$store.state.userId
+        };
+        let response = await DirectoryService.getHistoryLikes(credentials);
+        if (response.data.currentMonth) {
+          this.currentMonthLikes = response.data.currentMonth;
+        } else {
+          this.currentMonthLikes = 0;
+        }
+        if (response.data.total) {
+          this.totalLikes = response.data.total;
+        } else {
+          this.totalLikes = 0;
+        }
+      } catch (e) {
+        this.snackBarMessage = "Something Went Wrong";
+        this.snackbar = true;
       }
-      if (response.data.total) {
-        this.totalLikes = response.data.total;
-      } else {
-        this.totalLikes = 0;
-      }
-
-      // this.totalLikes = response.data.total;
     },
     //REVERSE THIS.CARDS
     reverseOrder() {
@@ -615,8 +628,6 @@ export default {
       });
       this.popularTags.length = 0;
       this.popularTags = nonZeroTags;
-      // console.log(this.popularTags);
-      // console.log(nonZeroTags);
     },
     //UPDATE POPULAR TAGS
     updatePopularTagsArray() {
@@ -625,7 +636,6 @@ export default {
         let data = {
           mainId: el.id,
           title: `${el.tag} - Used ${el.timesUsed} times.`
-          // subTitle: `Used ${el.timesUsed} times.`
         };
         this.cards.push(data);
       });
@@ -643,7 +653,6 @@ export default {
         };
         this.cards.push(data);
       });
-      // this.cardsFiltered = this.cards
     },
     //UPDATE PUBLISHED ARRAY
     updatePublishedArray() {
@@ -659,7 +668,6 @@ export default {
         };
         this.cards.push(data);
       });
-      // this.cardsFiltered = this.cards
     },
     //UPDATE FOLLOWING ARRAY
     updateFolowingArray() {
@@ -674,7 +682,6 @@ export default {
         };
         this.cards.push(data);
       });
-      // this.cardsFiltered = this.cards
     },
     //UPDATE FOLLOWERS ARRAY
     updateFollowersArray() {
@@ -689,7 +696,6 @@ export default {
         };
         this.cards.push(data);
       });
-      // this.cardsFiltered = this.cards
     },
     //UPDATE BOOKMARKS ARRAY
     updateBookmarksArray() {
@@ -704,11 +710,9 @@ export default {
         };
         this.cards.push(data);
       });
-      // this.cardsFiltered = this.cards
     },
     //UPLOAD NEW COVER IMAGE
     async uploadFiles() {
-      // console.log(this.file.size);
       if (this.file.size <= 1000000) {
         this.progressBarActive = true;
         try {
@@ -718,7 +722,6 @@ export default {
           let response = await DirectoryService.uploadCoverImage(formData);
           let url_id = response.data.url_id;
           this.src = url_id;
-          // this.deleteCoverImage();
           this.progressBarActive = false;
         } catch (e) {
           this.snackBarMessage = "There was a problem. Try again later";
@@ -736,7 +739,12 @@ export default {
       let credentials = {
         profileId: this.oldsrc
       };
-      await DirectoryService.removeProfileImage(credentials);
+      try {
+        await DirectoryService.removeProfileImage(credentials);
+      } catch (e) {
+        this.snackBarMessage = "Something Went Wrong";
+        this.snackbar = true;
+      }
     },
     //UPDATEWEBSITE FIELD
     updateWebAddress() {
@@ -765,60 +773,64 @@ export default {
     },
     //UPDATE THE USERS DETAILS
     async updateUser() {
-      if (this.oldsrc !== "") {
-        this.deleteCoverImage();
-      }
-      const searchRegExpP = /"/g;
-      const replaceWithP = `'`;
-
-      let aboutMember = this.aboutMember.replace(searchRegExpP, replaceWithP);
-      // let query = search.replace("?", "").split("=");
-      let checkname = [];
-      if (this.name !== this.nameOriginal) {
-        let nameCheck = await DirectoryService.checkName({ name: this.name });
-        // console.log("Name Check", nameCheck.data);
-        checkname = nameCheck.data;
-      }
-      if (checkname.length) {
-        this.snackBarMessage = "Your Name must be unique";
-        this.snackbar = true;
-        setTimeout(() => {
-          this.$nextTick(() => {
-            this.$refs.nameInput.focus();
-          });
-        }, 0);
-      } else {
-        let credentials = {
-          id: this.$store.state.userId,
-          name: this.name,
-          email: this.email,
-          website: this.website,
-          avatar: this.src,
-          tags: JSON.stringify(this.articleTags),
-          showEmail: this.showEmail,
-          aboutMember: aboutMember
-        };
-
-        let response = await DirectoryService.editMember(credentials);
-        if (response.data.success === true) {
-          let member = {
-            name: this.$store.state.userName,
-            email: this.$store.state.email,
-            id: this.$store.state.userId,
-            avatar: this.src,
-            website: this.website,
-            showEmail: this.showEmail,
-            aboutMember: aboutMember,
-            paidMember: this.paidMember,
-            memberExpires: this.memberExpires
-          };
-          this.$store.dispatch("setUser", member);
-          this.snackBarMessage = "Details saved";
-          this.snackbar = true;
-        } else {
-          this.snackBarMessage = "Something went wrong. Please try again later";
-          this.snackbar = true;
+      try {
+        if (this.oldsrc !== "") {
+          this.deleteCoverImage();
         }
+        const searchRegExpP = /"/g;
+        const replaceWithP = `'`;
+
+        let aboutMember = this.aboutMember.replace(searchRegExpP, replaceWithP);
+        let checkname = [];
+        if (this.name !== this.nameOriginal) {
+          let nameCheck = await DirectoryService.checkName({ name: this.name });
+          checkname = nameCheck.data;
+        }
+        if (checkname.length) {
+          this.snackBarMessage = "Your Name must be unique";
+          this.snackbar = true;
+          setTimeout(() => {
+            this.$nextTick(() => {
+              this.$refs.nameInput.focus();
+            });
+          }, 0);
+        } else {
+          let credentials = {
+            id: this.$store.state.userId,
+            name: this.name,
+            email: this.email,
+            website: this.website,
+            avatar: this.src,
+            tags: JSON.stringify(this.articleTags),
+            showEmail: this.showEmail,
+            aboutMember: aboutMember
+          };
+
+          let response = await DirectoryService.editMember(credentials);
+          if (response.data.success === true) {
+            let member = {
+              name: this.$store.state.userName,
+              email: this.$store.state.email,
+              id: this.$store.state.userId,
+              avatar: this.src,
+              website: this.website,
+              showEmail: this.showEmail,
+              aboutMember: aboutMember,
+              paidMember: this.paidMember,
+              memberExpires: this.memberExpires
+            };
+            this.$store.dispatch("setUser", member);
+            this.snackBarMessage = "Details saved";
+            this.snackbar = true;
+          } else {
+            this.snackBarMessage =
+              "Something went wrong. Please try again later";
+            this.snackbar = true;
+          }
+        }
+      } catch (e) {
+        this.snackBarMessage = "Something Went Wrong";
+        this.snackbar = true;
       }
     },
     async deleteBtn(event) {
@@ -829,10 +841,15 @@ export default {
         let credentials = {
           id: targetID
         };
-        let response = await DirectoryService.removeBookmark(credentials);
-        if (response.data.affectedRows === 1) {
-          this.collectData();
-          this.tab = tab;
+        try {
+          let response = await DirectoryService.removeBookmark(credentials);
+          if (response.data.affectedRows === 1) {
+            this.collectData();
+            this.tab = tab;
+          }
+        } catch (e) {
+          this.snackBarMessage = "Something Went Wrong";
+          this.snackbar = true;
         }
       }
       //UN FOLLOW
@@ -873,7 +890,6 @@ export default {
           imagesArray.push(el.url_id);
         });
       }
-      // console.log(imagesArray);
       if (imagesToDelete[0].coverImgID !== "sample") {
         imagesArray.push(imagesToDelete[0].coverImgID);
       }
@@ -882,17 +898,19 @@ export default {
         id: targetID,
         imagesArray: imagesArray
       };
-      let response = await DirectoryService.deleteArticle(credentials);
-      if (response.data) {
-        this.dialog = false;
-        this.collectData();
-        this.tab = tab;
+      try {
+        let response = await DirectoryService.deleteArticle(credentials);
+        if (response.data) {
+          this.dialog = false;
+          this.collectData();
+          this.tab = tab;
+        }
+      } catch (e) {
+        this.snackBarMessage = "Something Went Wrong";
+        this.snackbar = true;
       }
     },
-    //STILL TO DO
     editBtn(event) {
-      // let targetID = event.currentTarget.id;
-      // console.log(targetID);
       let targetID = event.currentTarget.id;
       this.$router.push({ name: "editdraft", query: { id: targetID } });
     },
@@ -904,7 +922,6 @@ export default {
     //VIEW PUBLISHED ARTICLE
     viewProfileBtn(event) {
       let targetID = event.currentTarget.id;
-      // console.log(targetID);
       this.$router.push({ name: "profileview", query: { id: targetID } });
     }
   },

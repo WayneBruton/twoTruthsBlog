@@ -1,9 +1,6 @@
 <template>
   <div>
-    <!-- <v-container fluid> </v-container> -->
     <v-app-bar app color="#111d5e" dark style="opacity:1;">
-      <!-- <v-app-bar app color="white" elevation="1" z-index="100" height="100"> -->
-      <!-- <v-toolbar app color="white" elevation="1" z-index="100"> -->
       <div class="d-flex align-center">
         <v-img
           v-if="this.$route.name === 'home'"
@@ -25,6 +22,20 @@
           <h3 class="returnHome" @click="home">Vellum</h3>
         </div>
       </div>
+      <v-spacer></v-spacer>
+
+      <v-btn
+        icon
+        text
+        :to="{ name: 'dashboard' }"
+        v-if="
+          this.$store.state.isLoggedOn &&
+            this.$store.state.isAdmin &&
+            this.$route.name != 'dashboard'
+        "
+      >
+        <v-icon>mdi-desktop-mac-dashboard</v-icon>
+      </v-btn>
       <v-spacer
         v-if="this.$store.state.isLoggedOn && this.windowWidth > 768"
       ></v-spacer>
@@ -49,8 +60,6 @@
           </v-btn>
         </div>
         <v-spacer></v-spacer>
-
-        <!-- <v-spacer></v-spacer> -->
         <v-menu bottom left offsetY min-width="12%" max-width="100%">
           <template v-slot:activator="{ on }">
             <v-btn dark icon v-on="on">
@@ -108,7 +117,6 @@ export default {
   data: () => ({
     windowWidth: null,
     src: require("../assets/Logo.png"),
-    // expand: true,
     items: [
       //MENU 1 = DROPDOWN
       {
@@ -244,11 +252,10 @@ export default {
       let targetID = event.currentTarget.id;
       if (targetID === "logout") {
         this.$store.dispatch("logout");
-        this.about();
+        // this.about();
         setTimeout(() => {
           this.home();
         }, 1);
-        // this.home();
         window.localStorage.removeItem("token");
       }
     }

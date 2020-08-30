@@ -1,12 +1,35 @@
-// import DirectoryService from "../services/DirectoryServices";
 import DirectoryService from "../services/DirectoryServices";
+import moment from "moment";
 const MyPlugin = {
   install(Vue) {
     Vue.mixin({
       data() {
-        return {};
+        return {
+          timeOut: 2000,
+          snackbarMessage: ""
+        };
       },
       methods: {
+        articleClick(event) {
+          let targetID = event.currentTarget.id;
+          if (this.tokenValid && this.$store.state.isLoggedOn) {
+            let credentials = {
+              thisMonth: moment(new Date())
+                // .add(1, "month")
+                .format("MMMM YYYY")
+            };
+            this.$store.dispatch("allowedToView", credentials);
+          }
+          setTimeout(() => {
+            if (!this.$store.state.isLoggedOn) {
+              this.$emit("notLoggedIn");
+            } else if (!this.$store.state.allowedToView) {
+              this.$store.dispatch("showSubscribe");
+            } else {
+              this.$router.push({ name: "articles", query: { id: targetID } });
+            }
+          }, 0);
+        },
         sizeOfFile() {
           if (this.file.size > 1000000) {
             this.file = [];
@@ -31,7 +54,12 @@ const MyPlugin = {
         },
         async deleteCurrentArticleImage() {
           if (this.imageToDelete) {
-            await DirectoryService.removeImage(this.imageToDelete);
+            try {
+              await DirectoryService.removeImage(this.imageToDelete);
+            } catch (e) {
+              this.snackbarMessage = "Could not delete Image";
+              this.snackbar = true;
+            }
           }
         },
         async deleteCoverImageWhenDiscarding() {
@@ -39,8 +67,13 @@ const MyPlugin = {
             this.src.url.includes("cloudinary") &&
             this.src.url_id !== "ancientruins"
           ) {
-            await DirectoryService.removeImage(this.src);
-            this.src = this.originalsrc;
+            try {
+              await DirectoryService.removeImage(this.src);
+              this.src = this.originalsrc;
+            } catch (e) {
+              this.snackbarMessage = "Could not delete Image";
+              this.snackbar = true;
+            }
           }
         },
         async deleteCover() {
@@ -48,7 +81,12 @@ const MyPlugin = {
             this.oldsrc.url.includes("cloudinary") &&
             this.oldsrc.url_id != "ancientruins"
           ) {
-            await DirectoryService.removeImage(this.oldsrc);
+            try {
+              await DirectoryService.removeImage(this.oldsrc);
+            } catch (e) {
+              this.snackbarMessage = "Could not delete Image";
+              this.snackbar = true;
+            }
           }
         },
         async uploadCoverFiles() {

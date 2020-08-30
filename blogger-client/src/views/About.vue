@@ -156,13 +156,18 @@
 export default {
   name: "about",
   metaInfo: {
-    title: `Vellum - About`,
+    title: "Vellum - About",
+    titleTemplate: "%s",
     meta: [
       {
         name: `description`,
-        content: `Staff Policies, remote work, telecommute`
+        content: `What Vellum is all about.`
       }
-    ]
+    ],
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
   },
   methods: {
     back() {

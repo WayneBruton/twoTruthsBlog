@@ -7,6 +7,9 @@
           {{ this.$store.state.userName }}
         </h1>
       </v-col>
+      <!-- <v-col :cols="flex" :offset="offset">
+        <Advert />
+      </v-col> -->
       <v-col :cols="flex" :offset="offset">
         <v-btn icon @click="viewChange">
           <v-icon color="#111d5e" large>{{ viewLook }}</v-icon>
@@ -52,6 +55,9 @@
           />
         </v-layout>
       </v-col>
+      <!-- <v-col :cols="flex" :offset="offset">
+        <Advert />
+      </v-col> -->
     </v-layout>
 
     <v-row justify="center">
@@ -128,14 +134,25 @@
     <div v-if="this.$store.state.showIntro && !this.$store.state.isLoggedOn">
       <Intro />
     </div>
+    <div v-if="this.$store.state.showSubscribe">
+      <Subscribe />
+    </div>
   </div>
 </template>
 
 <script>
+// import moment from "moment";
 import DirectoryService from "../services/DirectoryServices";
 export default {
   name: "MainPage",
-
+  metaInfo: {
+    title: "Vellum",
+    titleTemplate: "%s",
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
+  },
   data: () => ({
     windowWidth: null,
     viewLook: "mdi-view-grid",
@@ -144,7 +161,8 @@ export default {
     tags: [],
     following: [],
     dialog: false,
-    src: require("../assets/Logo.png")
+    src: require("../assets/Logo.png"),
+    timeOut: 2000
   }),
   components: {
     ArticlesLatestGrid: () => import("./mainPage/ArticlesLatestGrid"),
@@ -155,7 +173,9 @@ export default {
     ArticlesInterestList: () => import("./mainPage/ArticlesInterestList"),
     ArticlesFollowingList: () => import("./mainPage/ArticlesFollowingList"),
     ArticlesPopularList: () => import("./mainPage/ArticlesPopularList"),
-    Intro: () => import("./Intro")
+    // Advert: () => import("./Advert"),
+    Intro: () => import("./Intro"),
+    Subscribe: () => import("./Subscribe")
   },
   watch: {
     loggedIn: function() {
@@ -168,6 +188,10 @@ export default {
     }
   },
   async mounted() {
+    // this.$store.dispatch("showSubscribe");
+    this.$store.dispatch("resetSubscribe");
+
+    // console.log("THIS MONTH IS:", moment(new Date()).format("MMMM YYYY"));
     window.scrollTo(0, 0);
     this.loggedIn = this.$store.state.isLoggedOn;
     this.windowWidth = window.innerWidth;
@@ -181,23 +205,33 @@ export default {
     let credentials = {
       id: this.$store.state.userId
     };
-    if (this.$store.state.isLoggedOn) {
-      let response = await DirectoryService.yourInterests(credentials);
-      let followingResponse = await DirectoryService.youFollowing(credentials);
-      let following = [];
-      if (followingResponse.data.length) {
-        followingResponse.data.forEach(el => {
-          following.push(el.member_following);
-        });
+    try {
+      if (this.$store.state.isLoggedOn) {
+        let response = await DirectoryService.yourInterests(credentials);
+        let followingResponse = await DirectoryService.youFollowing(
+          credentials
+        );
+        let following = [];
+        if (followingResponse.data.length) {
+          followingResponse.data.forEach(el => {
+            following.push(el.member_following);
+          });
+        }
+        this.following = following;
+        this.tags = JSON.parse(response.data[0].tags);
       }
-      this.following = following;
-      this.tags = JSON.parse(response.data[0].tags);
+    } catch (e) {
+      // this.snackBarMessage = "Error getting articles";
+      // this.snack = true;
     }
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
   },
   methods: {
+    // resetAlloweds() {
+    //   this.$store.dispatch("resetAllowedToView");
+    // },
     onResize() {
       this.windowWidth = window.innerWidth;
     },

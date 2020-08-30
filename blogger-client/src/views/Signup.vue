@@ -5,26 +5,6 @@
       <v-col>
         <h1>Signup</h1>
         <v-layout align-center justify-center style="padding: 8px;">
-          <!-- <v-layout(align-center justify-center)> -->
-          <!-- <v-flex
-        class="text-xs-center"
-        xs-12
-        md-6
-        lg-4
-        offset-md2
-        width="300"
-        pa-5
-      >
-        <v-flex
-          class="text-xs-center"
-          xs-12
-          md-6
-          lg-4
-          offset-md2
-          width="300"
-          pa-5
-          row
-        > -->
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-text-field
               ref="nameInput"
@@ -110,8 +90,6 @@
             </v-snackbar>
             <br /><br />
           </v-form>
-          <!-- </v-flex> -->
-          <!-- </v-flex> -->
         </v-layout>
       </v-col>
     </v-row>
@@ -122,6 +100,20 @@
 import DirectoryServices from "@/services/DirectoryServices";
 export default {
   name: "signup",
+  metaInfo: {
+    title: "Join us",
+    titleTemplate: "Vellum - %s",
+    meta: [
+      {
+        name: `description`,
+        content: `Join Vellum here.`
+      }
+    ],
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
+  },
   data: () => ({
     valid: true,
     value: true,
@@ -132,7 +124,6 @@ export default {
       v => !!v || "Name is required",
       v => (v && v.length <= 20) || "Name must be less than 15 characters"
     ],
-    // email: "",
     email: "waynebruton@icloud.coma",
     emailRules: [
       v => !!v || "E-mail is required",
@@ -171,21 +162,24 @@ export default {
         adjustNumber = adjustNumber.split("-");
         adjustNumber = adjustNumber.join("");
         this.mobileForDB = adjustNumber;
-        // console.log(this.mobileForDB);
       }
     },
     async checkName() {
-      let nameCheck = await DirectoryServices.checkName({ name: this.name });
-      // console.log("Name Check", nameCheck.data);
-      if (nameCheck.data.length) {
-        this.snackbarMessage = "Your Name must be unique";
+      try {
+        let nameCheck = await DirectoryServices.checkName({ name: this.name });
+        if (nameCheck.data.length) {
+          this.snackbarMessage = "Your Name must be unique";
+          this.snackbar = true;
+          this.name = "";
+          setTimeout(() => {
+            this.$nextTick(() => {
+              this.$refs.nameInput.focus();
+            });
+          }, 0);
+        }
+      } catch (e) {
+        this.snackbarMessage = "Error checking Name";
         this.snackbar = true;
-        this.name = "";
-        setTimeout(() => {
-          this.$nextTick(() => {
-            this.$refs.nameInput.focus();
-          });
-        }, 0);
       }
     },
     async createMember() {
@@ -195,37 +189,44 @@ export default {
         password: this.password,
         mobile: this.mobileForDB
       };
-      let response = await DirectoryServices.createMember(user);
-      window.localStorage.setItem("token", response.data.token);
-      let member = response.data.member;
-      this.$store.dispatch("setUser", member);
-      if (this.$store.state.viewArticleIdBeforeLoggedIn !== null) {
-        this.$router.push({
-          name: "articles",
-          query: { id: this.$store.state.viewArticleIdBeforeLoggedIn }
-        });
-      } else {
-        this.$router.push({ name: "home" });
+      try {
+        let response = await DirectoryServices.createMember(user);
+        window.localStorage.setItem("token", response.data.token);
+        let member = response.data.member;
+        this.$store.dispatch("setUser", member);
+        if (this.$store.state.viewArticleIdBeforeLoggedIn !== null) {
+          this.$router.push({
+            name: "articles",
+            query: { id: this.$store.state.viewArticleIdBeforeLoggedIn }
+          });
+        } else {
+          this.$router.push({ name: "home" });
+        }
+      } catch (e) {
+        this.snackbarMessage = "Error checking Name";
+        this.snackbar = true;
       }
     },
     reset() {
       this.$refs.form.reset();
       this.checkbox = false;
     },
-    // resetValidation() {
-    //   this.$refs.form.resetValidation();
-    // },
     async checkEmail() {
       let email = {
         email: this.email
       };
-      let response = await DirectoryServices.checkEmail(email);
-      if (response.data.length > 0) {
-        this.emailExists = true;
-        this.snackbarMessage = "Email exists - Rather login?";
+      try {
+        let response = await DirectoryServices.checkEmail(email);
+        if (response.data.length > 0) {
+          this.emailExists = true;
+          this.snackbarMessage = "Email exists - Rather login?";
+          this.snackbar = true;
+        } else {
+          this.emailExists = false;
+        }
+      } catch (e) {
+        this.snackbarMessage = "Error checking Email";
         this.snackbar = true;
-      } else {
-        this.emailExists = false;
       }
     },
     logoff() {
@@ -246,7 +247,6 @@ export default {
         test.unshift("0");
         this.mobile = test.join("");
       }
-      // console.log(this.mobile);
     }
   }
 };

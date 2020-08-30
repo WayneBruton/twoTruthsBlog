@@ -72,7 +72,7 @@
             dense
             item-color="#111d5e"
           ></v-combobox>
-          <!-- {{ date }} {{ time }} -->
+          Schedule
           <v-btn
             @click="resetTime"
             color="#111d5e"
@@ -243,10 +243,23 @@
 
 <script>
 import { VueEditor } from "vue2-editor";
-// import PreviewArticle from "../components/PreviewArticle";
 import DirectoryService from "../services/DirectoryServices";
 export default {
   name: "editdraft",
+  metaInfo: {
+    title: "Edit Article",
+    titleTemplate: "Vellum - %s",
+    meta: [
+      {
+        name: `description`,
+        content: `Edit your article.`
+      }
+    ],
+    htmlAttrs: {
+      lang: "en",
+      amp: true
+    }
+  },
   components: {
     VueEditor,
     PreviewArticle: () => import("../components/PreviewArticle")
@@ -328,55 +341,54 @@ export default {
       });
       this.resizePage();
     }, 0);
-    let search = window.location.search;
-    let query = search.replace("?", "").split("=");
-    let credentials = query[query.length - 1];
-    let response2 = await DirectoryService.getDraft(credentials);
-    // console.log("RESPONSE 2 ", response2.data);
-    this.articleId = response2.data[0].id;
-    // console.log(this.articleId);
-    this.originalDate = new Date(response2.data[0].publish_date)
-      .toISOString()
-      .substr(0, 10);
-    this.originalTime = new Date(
-      response2.data[0].publish_date
-    ).toLocaleTimeString();
-    this.date = this.originalDate;
-    this.time = this.originalTime;
-    // console.log(this.originalDate);
-    // console.log(this.originalTime);
-    this.content = response2.data[0].content;
-    this.originalContent = response2.data[0].content;
-    this.title = response2.data[0].title;
-    this.originalTitle = response2.data[0].title;
-    this.credit = response2.data[0].credit;
-    this.originalCredit = response2.data[0].credit;
-    this.src.url_id = response2.data[0].coverImgID;
-    this.originalsrc.url_id = response2.data[0].coverImgID;
-    // console.log(this.src);
-    this.articleTags = [];
-    let existingTags = JSON.parse(response2.data[0].tags);
-    if (existingTags.length) {
-      existingTags.forEach(el => {
-        this.articleTags.push(el);
+    try {
+      let search = window.location.search;
+      let query = search.replace("?", "").split("=");
+      let credentials = query[query.length - 1];
+      let response2 = await DirectoryService.getDraft(credentials);
+      this.articleId = response2.data[0].id;
+      this.originalDate = new Date(response2.data[0].publish_date)
+        .toISOString()
+        .substr(0, 10);
+      this.originalTime = new Date(
+        response2.data[0].publish_date
+      ).toLocaleTimeString();
+      this.date = this.originalDate;
+      this.time = this.originalTime;
+      this.content = response2.data[0].content;
+      this.originalContent = response2.data[0].content;
+      this.title = response2.data[0].title;
+      this.originalTitle = response2.data[0].title;
+      this.credit = response2.data[0].credit;
+      this.originalCredit = response2.data[0].credit;
+      this.src.url_id = response2.data[0].coverImgID;
+      this.originalsrc.url_id = response2.data[0].coverImgID;
+      this.articleTags = [];
+      let existingTags = JSON.parse(response2.data[0].tags);
+      if (existingTags.length) {
+        existingTags.forEach(el => {
+          this.articleTags.push(el);
+        });
+      }
+
+      this.articleImagesArray = JSON.parse(response2.data[0].articleImages);
+      this.originalarticleImagesArray = JSON.parse(
+        response2.data[0].articleImages
+      );
+
+      let response = await DirectoryService.getTags();
+      this.tags = [];
+      response.data.forEach(el => {
+        this.tags.push(el.tag);
       });
-    }
-
-    this.articleImagesArray = JSON.parse(response2.data[0].articleImages);
-    this.originalarticleImagesArray = JSON.parse(
-      response2.data[0].articleImages
-    );
-    // console.log(this.articleImagesArray);
-
-    let response = await DirectoryService.getTags();
-    this.tags = [];
-    response.data.forEach(el => {
-      this.tags.push(el.tag);
-    });
-    if (this.$store.state.avatar === null) {
-      this.publicID = "";
-    } else {
-      this.publicID = this.$store.state.avatar;
+      if (this.$store.state.avatar === null) {
+        this.publicID = "";
+      } else {
+        this.publicID = this.$store.state.avatar;
+      }
+    } catch (e) {
+      this.snackBarMessage = "Error getting articles";
+      this.snack = true;
     }
   },
   methods: {
@@ -414,31 +426,40 @@ export default {
       let credentials = {
         id: this.articleId
       };
-      // let response = await DirectoryService.deleteEditArticle(credentials);
-      await DirectoryService.deleteEditArticle(credentials);
-      // console.log(response.data);
-      this.$router.push({ name: "setup" });
+      try {
+        await DirectoryService.deleteEditArticle(credentials);
+      } catch (e) {
+        this.snackBarMessage = "Error discarding post";
+        this.snack = true;
+      } finally {
+        this.$router.push({ name: "setup" });
+      }
     },
     async handleImageAdded(file, Editor, cursorLocation, resetUploader) {
-      if (file.size > parseInt(process.env.VUE_APP_FILESIZE)) {
-        this.snackBarMessage = "Article image cannot exceed 2Mb";
-        this.snackbar = true;
-        // return this.progressBarActive = false;
-        return (this.snackbar = true);
-      } else {
-        this.progressBarActive = true;
-        var formData = new FormData();
-        formData.append("image", file);
-        let response = await DirectoryService.uploadImageInEditor(formData);
-        let url = response.data.url;
-        let url_id = response.data.url_id;
-        let imageInfo = {
-          url,
-          url_id
-        };
-        this.articleImagesArray.push(imageInfo);
-        Editor.insertEmbed(cursorLocation, "image", url);
-        resetUploader();
+      try {
+        if (file.size > parseInt(process.env.VUE_APP_FILESIZE)) {
+          this.snackBarMessage = "Article image cannot exceed 2Mb";
+          this.snackbar = true;
+          return (this.snackbar = true);
+        } else {
+          this.progressBarActive = true;
+          var formData = new FormData();
+          formData.append("image", file);
+          let response = await DirectoryService.uploadImageInEditor(formData);
+          let url = response.data.url;
+          let url_id = response.data.url_id;
+          let imageInfo = {
+            url,
+            url_id
+          };
+          this.articleImagesArray.push(imageInfo);
+          Editor.insertEmbed(cursorLocation, "image", url);
+          resetUploader();
+        }
+      } catch (e) {
+        this.snackBarMessage = "Error getting articles";
+        this.snack = true;
+      } finally {
         this.progressBarActive = false;
       }
     },
@@ -446,43 +467,48 @@ export default {
       this.sizeOfFile();
     },
     async publishArticle(event) {
-      this.addNewTag();
-      let targetID = event.currentTarget.id;
-      let isDraft;
-      if (targetID === "publish") {
-        isDraft = false;
-      } else {
-        isDraft = true;
-      }
-      if (this.articleTags.length) {
-        let article = {
-          id: this.articleId,
-          member: this.$store.state.userId,
-          member_name: this.$store.state.userName,
-          coverImgURL: this.src.url,
-          coverImgID: this.src.url_id,
-          title: this.title,
-          credit: this.credit,
-          content: this.content,
-          tags: JSON.stringify(this.articleTags),
-          isDraft: isDraft,
-          newTags: JSON.stringify(this.newTags),
-          articleImages: JSON.stringify(this.articleImagesArray),
-          publish_date: `${this.date} ${this.time}`
-        };
-        let response = await DirectoryService.saveArticle(article);
-        if (response.data.Awesome && !isDraft) {
-          this.snackBarMessage = "Successfully Published";
-          this.snackbar = true;
-          this.articleSaved = true;
-        } else if (response.data.Awesome && isDraft) {
-          this.snackBarMessage = "Saved to Drafts";
-          this.snackbar = true;
-          this.articleSaved = true;
+      try {
+        this.addNewTag();
+        let targetID = event.currentTarget.id;
+        let isDraft;
+        if (targetID === "publish") {
+          isDraft = false;
+        } else {
+          isDraft = true;
         }
-      } else {
-        this.snackBarMessage = "You must have at least one tag";
-        this.snackbar = true;
+        if (this.articleTags.length) {
+          let article = {
+            id: this.articleId,
+            member: this.$store.state.userId,
+            member_name: this.$store.state.userName,
+            coverImgURL: this.src.url,
+            coverImgID: this.src.url_id,
+            title: this.title,
+            credit: this.credit,
+            content: this.content,
+            tags: JSON.stringify(this.articleTags),
+            isDraft: isDraft,
+            newTags: JSON.stringify(this.newTags),
+            articleImages: JSON.stringify(this.articleImagesArray),
+            publish_date: `${this.date} ${this.time}`
+          };
+          let response = await DirectoryService.saveArticle(article);
+          if (response.data.Awesome && !isDraft) {
+            this.snackBarMessage = "Successfully Published";
+            this.snackbar = true;
+            this.articleSaved = true;
+          } else if (response.data.Awesome && isDraft) {
+            this.snackBarMessage = "Saved to Drafts";
+            this.snackbar = true;
+            this.articleSaved = true;
+          }
+        } else {
+          this.snackBarMessage = "You must have at least one tag";
+          this.snackbar = true;
+        }
+      } catch (e) {
+        this.snackBarMessage = "Error publishing Article";
+        this.snack = true;
       }
     },
     closeDialog() {
@@ -508,10 +534,6 @@ export default {
         JSON.stringify(this.originalarticleImagesArray) !=
           JSON.stringify(this.articleImagesArray))
     ) {
-      // if (
-      //   !this.articleSaved &&
-      //   (this.content !== "" || this.src.url_id !== "ancientruins")
-      // )
       if (this.to) {
         next();
       } else {

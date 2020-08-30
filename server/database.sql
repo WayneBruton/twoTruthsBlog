@@ -22,6 +22,7 @@ alter table members add column expires TIMESTAMP DEFAULT NOW();
 alter table members alter showEmail set default false;
 
 alter table members add column tags text;
+alter table members add column isAdmin boolean default false;
 
 create table tags (
     id int auto_increment primary key,
@@ -51,7 +52,7 @@ create table articles (
 alter table articles add column publish_Date TIMESTAMP DEFAULT NOW();
 
 
-ALTER TABLE articles ADD FULLTEXT (title, content, member_name);
+ALTER TABLE articles ADD FULLTEXT (title, content, member_name, tags);
 
 alter table articles add articleImages text;
 
@@ -107,6 +108,22 @@ create table replies (
     FOREIGN KEY (articleNumber) REFERENCES articles(id),
     FOREIGN KEY (replyTo) REFERENCES comments(id)
 );
+
+create table allowedViewsNonSubscriber (
+    id int auto_increment primary key,
+    allowedViews INT Not NULL DEFAULT 5
+);
+
+
+insert into allowedViewsNonSubscriber (allowedViews) values (5);
+
+create table faq (
+    id int auto_increment primary key,
+    question varchar(160) not null,
+    answer text Not NULL,
+    createdAt TIMESTAMP DEFAULT NOW()
+);
+
 
 insert into tags (tag) values (
 ('Startup'),
