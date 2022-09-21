@@ -28,7 +28,7 @@
     "vue-sanitize": "^0.2.0",
     "vue-social-sharing": "^3.0.0-beta.11",
     "vue2-editor": "^2.10.2",
-    "vuetify": "^2.3.2",
+    "vuetify": "^2.6.10",
     "vuex": "^3.4.0",
     "vuex-persistedstate": "^2.7.1"
   },
